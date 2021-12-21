@@ -3,7 +3,7 @@
   "description": "A simple gateway for counting usage over plans backed in Redis",
   "homepage": "https://nicedoc.io/microlinkhq/gateway",
   "version": "0.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
   "author": {
     "email": "hello@microlink.io",
     "name": "microlink.io",
@@ -20,7 +20,9 @@
     "gateway",
     "redis"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "moment": "~2.29.1"
+  },
   "devDependencies": {
     "@commitlint/cli": "latest",
     "@commitlint/config-conventional": "latest",
@@ -29,22 +31,30 @@
     "conventional-github-releaser": "latest",
     "finepack": "latest",
     "git-authors-cli": "latest",
+    "ioredis": "latest",
     "nano-staged": "latest",
     "npm-check-updates": "latest",
     "prettier-standard": "latest",
     "simple-git-hooks": "latest",
     "standard": "latest",
     "standard-markdown": "latest",
-    "standard-version": "latest"
+    "standard-version": "latest",
+    "ts-node": "latest",
+    "ts-standard": "~11.0.0",
+    "typescript": "latest"
   },
   "engines": {
     "node": ">= 14"
   },
+  "files": [
+    "dist/**/*"
+  ],
   "scripts": {
-    "clean": "rm -rf node_modules",
+    "build": "npm run clean && tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist",
     "contributors": "(git-authors-cli && finepack && git add package.json && git commit -m 'build: contributors' --no-verify) || true",
     "coverage": "c8 report --reporter=text-lcov > coverage/lcov.info",
-    "lint": "standard-markdown README.md && standard",
+    "lint": "standard-markdown README.md && ts-standard",
     "postrelease": "npm run release:tags && npm run release:github && npm publish",
     "prerelease": "npm run update:check && npm run contributors",
     "pretest": "npm run lint",
@@ -56,6 +66,14 @@
     "update:check": "ncu -- --error-level 2"
   },
   "license": "MIT",
+  "ava": {
+    "extensions": [
+      "ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ]
+  },
   "commitlint": {
     "extends": [
       "@commitlint/config-conventional"
@@ -75,5 +93,6 @@
   "simple-git-hooks": {
     "commit-msg": "npx commitlint --edit",
     "pre-commit": "npx nano-staged"
-  }
+  },
+  "types": "dist/index.d.ts"
 }
