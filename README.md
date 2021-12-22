@@ -35,7 +35,7 @@ gateway('do something')
 
 #### input
 
-*Required*<br>
+_Required_<br>
 Type: `string`
 
 Lorem ipsum.
