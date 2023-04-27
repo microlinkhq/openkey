@@ -3,10 +3,10 @@
   "description": "A simple gateway for counting usage over plans backed in Redis",
   "homepage": "https://nicedoc.io/microlinkhq/gateway",
   "version": "0.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
   "author": {
-    "email": "hello@microlink.io",
     "name": "microlink.io",
+    "email": "hello@microlink.io",
     "url": "https://microlink.io"
   },
   "repository": {
@@ -20,38 +20,45 @@
     "gateway",
     "redis"
   ],
-  "dependencies": {},
   "devDependencies": {
+    "@babel/preset-env": "~7.21.4",
+    "@babel/preset-typescript": "~7.21.4",
     "@commitlint/cli": "latest",
     "@commitlint/config-conventional": "latest",
+    "@types/ioredis": "~5.0.0",
+    "@types/jest": "~29.5.1",
+    "@types/node": "~18.16.1",
     "ava": "latest",
     "c8": "latest",
-    "conventional-github-releaser": "latest",
+    "conventional-github-releaser": "~1.1.7",
     "finepack": "latest",
     "git-authors-cli": "latest",
+    "jest": "~29.5.0",
     "nano-staged": "latest",
     "npm-check-updates": "latest",
-    "prettier-standard": "latest",
+    "prettier-standard": "~15.0.1",
     "simple-git-hooks": "latest",
     "standard": "latest",
     "standard-markdown": "latest",
-    "standard-version": "latest"
+    "standard-version": "latest",
+    "supertest": "~6.3.3",
+    "typescript": "~5.0.4"
   },
   "engines": {
-    "node": ">= 14"
+    "node": ">= 18"
   },
   "scripts": {
-    "clean": "rm -rf node_modules",
     "contributors": "(git-authors-cli && finepack && git add package.json && git commit -m 'build: contributors' --no-verify) || true",
     "coverage": "c8 report --reporter=text-lcov > coverage/lcov.info",
     "lint": "standard-markdown README.md && standard",
     "postrelease": "npm run release:tags && npm run release:github && npm publish",
     "prerelease": "npm run update:check && npm run contributors",
-    "pretest": "npm run lint",
     "release": "standard-version -a",
     "release:github": "conventional-github-releaser -p angular",
     "release:tags": "git push --follow-tags origin HEAD:master",
-    "test": "c8 ava",
+    "test": "jest ./tests/ --forceExit",
+    "build": "tsc",
+    "clean": "rm -rf dist",
     "update": "ncu -u",
     "update:check": "ncu -- --error-level 2"
   },
@@ -75,5 +82,10 @@
   "simple-git-hooks": {
     "commit-msg": "npx commitlint --edit",
     "pre-commit": "npx nano-staged"
+  },
+  "dependencies": {
+    "dotenv": "~16.0.3",
+    "express": "~4.18.2",
+    "ioredis": "~5.3.2"
   }
 }
