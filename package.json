@@ -33,7 +33,7 @@
     "@commitlint/cli": "latest",
     "@commitlint/config-conventional": "latest",
     "@ksmithut/prettier-standard": "latest",
-    "ava": "5",
+    "ava": "6",
     "c8": "latest",
     "finepack": "latest",
     "git-authors-cli": "latest",
