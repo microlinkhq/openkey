@@ -126,6 +126,19 @@ test('.update # prevent to add random data', async t => {
   t.is(plan.foo, undefined)
 })
 
+test('.update # error if plan does not exist', async t => {
+  {
+    const error = await t.throwsAsync(plans.update('id', { foo: 'bar' }))
+    t.is(error.message, 'The id `id` must to start with `plan_`.')
+    t.is(error.name, 'TypeError')
+  }
+  {
+    const error = await t.throwsAsync(plans.update('plan_id', { foo: 'bar' }))
+    t.is(error.message, 'The plan `plan_id` does not exist.')
+    t.is(error.name, 'TypeError')
+  }
+})
+
 test.serial('.list', async t => {
   const { id: id1 } = await plans.create({
     name: 'free tier',

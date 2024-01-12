@@ -1,16 +1,17 @@
 import { pick, uid, validateKey } from './util.js'
 
 export const KEY_PREFIX = 'key_'
-const KEY_FIELDS = ['name', 'description', 'enabled', 'value']
+const KEY_FIELDS = ['name', 'description', 'enabled', 'value', 'plan']
 const KEY_FIELDS_OBJECT = ['metadata']
 
-export default ({ serialize, deserialize, redis } = {}) => {
+export default ({ serialize, deserialize, plans, redis } = {}) => {
   /**
    * Create a key.
    *
    * @param {Object} options - The options for creating a plan.
    * @param {string} options.name - The name of the key.
    * @param {string} [options.value] - The value of the key.
+   * @param {string} [options.plan] - The id of the plan associated.
    * @param {string} [options.description] - The description of the key.
    * @param {string} [options.enabled] - Whether the key is enabled or not.
    * @param {Object} [options.metadata] - Any extra information can be attached here.
@@ -25,6 +26,7 @@ export default ({ serialize, deserialize, redis } = {}) => {
     key.createdAt = key.updatedAt = Date.now()
     key.value = await uid({ redis, size: 16 })
     if (key.enabled === undefined) key.enabled = true
+    if (opts.plan) await plans.retrieve(opts.plan, { throwError: true })
     await redis.setnx(key.id, serialize(key))
     return key
   }
@@ -33,11 +35,20 @@ export default ({ serialize, deserialize, redis } = {}) => {
    * Retrieve a key by id.
    *
    * @param {string} keyId - The id of the key.
+   * @param {Object} [options] - The options for retrieving a key.
+   * @param {boolean} [options.validate=true] - Validate if the plan id is valid.
+   * @param {boolean} [options.throwError=false] - Throw an error if the plan does not exist.
    *
    * @returns {Object} The key.
    */
-  const retrieve = async (keyId, opts) =>
-    deserialize(await redis.get(key(keyId, opts)))
+  const retrieve = async (
+    keyId,
+    { throwError = false, validate = true } = {}
+  ) => {
+    const key = await redis.get(getKey(keyId, { validate }))
+    if (key === null && throwError) { throw new TypeError(`The key \`${keyId}\` does not exist.`) }
+    return deserialize(key)
+  }
 
   /**
    * Delete a key by id.
@@ -46,8 +57,19 @@ export default ({ serialize, deserialize, redis } = {}) => {
    *
    * @returns {boolean} Whether the key was deleted or not.
    */
-  const del = async (keyId, opts) => {
-    const isDeleted = Boolean(await redis.del(key(keyId, opts)))
+  const del = async keyId => {
+    const key = await retrieve(keyId, { verify: true })
+
+    if (key !== null && key.plan) {
+      const plan = await plans.retrieve(key.plan, { throwError: true, validate: false })
+      if (plan !== null) {
+        throw new TypeError(
+          `The key \`${keyId}\` is associated with the plan \`${getKey.plan}\``
+        )
+      }
+    }
+
+    const isDeleted = Boolean(await redis.del(getKey(keyId, { verify: true })))
     if (!isDeleted) throw new TypeError(`The key \`${keyId}\` does not exist.`)
     return isDeleted
   }
@@ -66,11 +88,14 @@ export default ({ serialize, deserialize, redis } = {}) => {
    * @returns {Object} The updated plan.
    */
   const update = async (keyId, opts) => {
-    const currentKey = await retrieve(keyId)
+    const currentKey = await retrieve(keyId, { throwError: true })
     if (!currentKey) throw new TypeError(`The key \`${keyId}\` does not exist.`)
     const metadata = Object.assign({}, currentKey.metadata, opts.metadata)
-    const key = Object.assign(currentKey, pick(opts, KEY_FIELDS), { updatedAt: Date.now() })
+    const key = Object.assign(currentKey, pick(opts, KEY_FIELDS), {
+      updatedAt: Date.now()
+    })
     if (Object.keys(metadata).length) key.metadata = metadata
+    if (key.plan) await plans.retrieve(key.plan, { throwError: true })
     await redis.set(keyId, serialize(key))
     return key
   }
@@ -83,11 +108,11 @@ export default ({ serialize, deserialize, redis } = {}) => {
   const list = async () => {
     const keyIds = await redis.keys(`${KEY_PREFIX}*`)
     return Promise.all(
-      keyIds.map(keyIds => retrieve(keyIds, { verify: false }))
+      keyIds.map(keyIds => retrieve(keyIds, { validate: false }))
     )
   }
 
-  const key = validateKey({ prefix: KEY_PREFIX })
+  const getKey = validateKey({ prefix: KEY_PREFIX })
 
   return {
     create,

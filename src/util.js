@@ -2,7 +2,7 @@ import { getRandomValues } from 'crypto'
 
 const BASE_58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 
-const rand = (size) =>
+const rand = size =>
   getRandomValues(new Uint8Array(size)).reduce(
     (id, value) => id + BASE_58.charAt(value % BASE_58.length),
     ''
@@ -21,8 +21,10 @@ export const pick = (obj, keys) => {
   return result
 }
 
-export const validateKey = ({ prefix }) => (id, { verify = true } = {}) => {
-  if (!verify) return id
-  if (!id.startsWith(prefix)) throw new Error(`The id \`${id}\` must to start with \`${prefix}\`.`)
-  return id
-}
+export const validateKey =
+  ({ prefix }) =>
+    (id, { validate = true } = {}) => {
+      if (!validate) return id
+      if (!id.startsWith(prefix)) throw new TypeError(`The id \`${id}\` must to start with \`${prefix}\`.`)
+      return id
+    }
