@@ -9,8 +9,7 @@ export default ({
   redis = new Map()
 } = {}) => {
   if (!redis) throw TypeError('The argument `store` is required.')
-  return {
-    keys: createKeys({ serialize, deserialize, redis }),
-    plans: createPlans({ serialize, deserialize, redis })
-  }
+  const plans = createPlans({ serialize, deserialize, redis })
+  const keys = createKeys({ serialize, deserialize, redis, plans })
+  return { keys, plans }
 }

@@ -13,8 +13,8 @@
     "openkey": "bin/index.js"
   },
   "author": {
-    "email": "hello@microlink.io",
     "name": "microlink.io",
+    "email": "hello@microlink.io",
     "url": "https://microlink.io"
   },
   "repository": {
@@ -28,6 +28,9 @@
   "dependencies": {
     "mri": "~1.2.0"
   },
+  "files": [
+    "src"
+  ],
   "devDependencies": {
     "ioredis": "latest",
     "@commitlint/cli": "latest",
@@ -35,9 +38,10 @@
     "@ksmithut/prettier-standard": "latest",
     "ava": "5",
     "c8": "latest",
+    "ci-publish": "latest",
+    "github-generate-release": "latest",
     "finepack": "latest",
     "git-authors-cli": "latest",
-    "github-generate-release": "latest",
     "nano-staged": "latest",
     "npm-check-updates": "latest",
     "simple-git-hooks": "latest",
@@ -53,7 +57,7 @@
     "contributors": "(npx git-authors-cli && npx finepack && git add package.json && git commit -m 'build: contributors' --no-verify) || true",
     "coverage": "c8 report --reporter=text-lcov > coverage/lcov.info",
     "lint": "standard-markdown README.md && standard",
-    "postrelease": "npm run release:tags && npm run release:github && npm publish",
+    "postrelease": "npm run release:tags && npm run release:github && (ci-publish || npm publish --access=public)",
     "prerelease": "npm run update:check",
     "pretest": "npm run lint",
     "release": "standard-version -a",
