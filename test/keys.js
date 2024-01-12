@@ -1,5 +1,3 @@
-'use strict'
-
 import { setTimeout } from 'timers/promises'
 import openkey from 'openkey'
 import Redis from 'ioredis'
@@ -24,8 +22,19 @@ test('.create # `name` is required', async t => {
   t.is(error.name, 'TypeError')
 })
 
+test('.create # error if plan is invalid', async t => {
+  const error = await t.throwsAsync(
+    keys.create({ name: 'hello@microlink.io', plan: 123 })
+  )
+
+  t.is(error.message, 'The id `123` must to start with `plan_`.')
+  t.is(error.name, 'TypeError')
+})
+
 test('.create # error if plan does not exist', async t => {
-  const error = await t.throwsAsync(keys.create({ name: 'hello@microlink.io', plan: 'plan_123' }))
+  const error = await t.throwsAsync(
+    keys.create({ name: 'hello@microlink.io', plan: 'plan_123' })
+  )
 
   t.is(error.message, 'The plan `plan_123` does not exist.')
   t.is(error.name, 'TypeError')
@@ -55,7 +64,9 @@ test('.retrieve', async t => {
 })
 
 test('.update', async t => {
-  const { id, value, createdAt } = await keys.create({ name: 'hello@microlink.io' })
+  const { id, value, createdAt } = await keys.create({
+    name: 'hello@microlink.io'
+  })
 
   await setTimeout(0) // ensure time move forward
 
@@ -77,16 +88,31 @@ test('.update', async t => {
   t.deepEqual(await keys.retrieve(id), { ...key, updatedAt })
 })
 
+test('.update # error if plan is invalid', async t => {
+  const { id } = await keys.create({ name: 'hello@microlink.io' })
+
+  const error = await t.throwsAsync(
+    keys.update(id, {
+      description: 'new description',
+      enabled: false,
+      plan: 123
+    })
+  )
+
+  t.is(error.message, 'The id `123` must to start with `plan_`.')
+  t.is(error.name, 'TypeError')
+})
+
 test('.update # error if plan does not exist', async t => {
   const { id } = await keys.create({ name: 'hello@microlink.io' })
 
-  await setTimeout(0) // ensure time move forward
-
-  const error = await t.throwsAsync(keys.update(id, {
-    description: 'new description',
-    enabled: false,
-    plan: 'plan_123'
-  }))
+  const error = await t.throwsAsync(
+    keys.update(id, {
+      description: 'new description',
+      enabled: false,
+      plan: 'plan_123'
+    })
+  )
 
   t.is(error.message, 'The plan `plan_123` does not exist.')
   t.is(error.name, 'TypeError')
@@ -142,10 +168,17 @@ test.serial('.list', async t => {
 })
 
 test('.del', async t => {
-  const { id } = await keys.create({ name: 'hello@microlink.io' })
+  {
+    const { id } = await keys.create({ name: 'hello@microlink.io' })
 
-  t.true(await keys.del(id))
-  t.is(await keys.retrieve(id), null)
+    t.true(await keys.del(id))
+    t.is(await keys.retrieve(id), null)
+  }
+  {
+    const { id } = await keys.create({ name: 'hello@microlink.io', plan: null })
+    t.true(await keys.del(id))
+    t.is(await keys.retrieve(id), null)
+  }
 })
 
 test('.del # error if key does not exist', async t => {
@@ -161,7 +194,10 @@ test('.del # error plan associated exist', async t => {
     quota: { limit: 3000, period: 'day' }
   })
 
-  const { id } = await keys.create({ name: 'hello@microlink.io', plan: plan.id })
+  const { id } = await keys.create({
+    name: 'hello@microlink.io',
+    plan: plan.id
+  })
   const error = await t.throwsAsync(keys.del(id))
 
   t.true(error.message.includes('is associated with the plan'))

@@ -1,5 +1,3 @@
-'use strict'
-
 import { setTimeout } from 'timers/promises'
 import openkey from 'openkey'
 import Redis from 'ioredis'
@@ -25,26 +23,43 @@ test('.create # `name` is required', async t => {
 test('.create # `quota` is required', async t => {
   {
     const error = await t.throwsAsync(plans.create({ name: 'free tier' }))
-    t.is(error.message, 'The argument `quota.period` must be `day` or `week` or `month`.')
+    t.is(
+      error.message,
+      'The argument `quota.period` must be `day` or `week` or `month`.'
+    )
     t.is(error.name, 'TypeError')
   }
   {
-    const error = await t.throwsAsync(plans.create({ name: 'free tier', quota: {} }))
-    t.is(error.message, 'The argument `quota.period` must be `day` or `week` or `month`.')
+    const error = await t.throwsAsync(
+      plans.create({ name: 'free tier', quota: {} })
+    )
+    t.is(
+      error.message,
+      'The argument `quota.period` must be `day` or `week` or `month`.'
+    )
     t.is(error.name, 'TypeError')
   }
   {
-    const error = await t.throwsAsync(plans.create({ name: 'free tier', quota: { period: 'today' } }))
-    t.is(error.message, 'The argument `quota.period` must be `day` or `week` or `month`.')
+    const error = await t.throwsAsync(
+      plans.create({ name: 'free tier', quota: { period: 'today' } })
+    )
+    t.is(
+      error.message,
+      'The argument `quota.period` must be `day` or `week` or `month`.'
+    )
     t.is(error.name, 'TypeError')
   }
   {
-    const error = await t.throwsAsync(plans.create({ name: 'free tier', quota: { period: 'week' } }))
+    const error = await t.throwsAsync(
+      plans.create({ name: 'free tier', quota: { period: 'week' } })
+    )
     t.is(error.message, 'The argument `quota.limit` must be a positive number.')
     t.is(error.name, 'TypeError')
   }
   {
-    const error = await t.throwsAsync(plans.create({ name: 'free tier', quota: { period: 'week', limit: 0 } }))
+    const error = await t.throwsAsync(
+      plans.create({ name: 'free tier', quota: { period: 'week', limit: 0 } })
+    )
     t.is(error.message, 'The argument `quota.limit` must be a positive number.')
     t.is(error.name, 'TypeError')
   }

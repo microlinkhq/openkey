@@ -39,14 +39,16 @@ export default ({ serialize, deserialize, plans, redis } = {}) => {
    * @param {boolean} [options.validate=true] - Validate if the plan id is valid.
    * @param {boolean} [options.throwError=false] - Throw an error if the plan does not exist.
    *
-   * @returns {Object} The key.
+   * @returns {Object|null} The key object, null if it doesn't exist.
    */
   const retrieve = async (
     keyId,
     { throwError = false, validate = true } = {}
   ) => {
     const key = await redis.get(getKey(keyId, { validate }))
-    if (key === null && throwError) { throw new TypeError(`The key \`${keyId}\` does not exist.`) }
+    if (key === null && throwError) {
+      throw new TypeError(`The key \`${keyId}\` does not exist.`)
+    }
     return deserialize(key)
   }
 
@@ -60,8 +62,11 @@ export default ({ serialize, deserialize, plans, redis } = {}) => {
   const del = async keyId => {
     const key = await retrieve(keyId, { verify: true })
 
-    if (key !== null && key.plan) {
-      const plan = await plans.retrieve(key.plan, { throwError: true, validate: false })
+    if (key !== null && typeof key.plan === 'string') {
+      const plan = await plans.retrieve(key.plan, {
+        throwError: true,
+        validate: false
+      })
       if (plan !== null) {
         throw new TypeError(
           `The key \`${keyId}\` is associated with the plan \`${getKey.plan}\``
@@ -69,7 +74,7 @@ export default ({ serialize, deserialize, plans, redis } = {}) => {
       }
     }
 
-    const isDeleted = Boolean(await redis.del(getKey(keyId, { verify: true })))
+    const isDeleted = (await redis.del(getKey(keyId, { verify: true }))) === 1
     if (!isDeleted) throw new TypeError(`The key \`${keyId}\` does not exist.`)
     return isDeleted
   }
@@ -89,7 +94,6 @@ export default ({ serialize, deserialize, plans, redis } = {}) => {
    */
   const update = async (keyId, opts) => {
     const currentKey = await retrieve(keyId, { throwError: true })
-    if (!currentKey) throw new TypeError(`The key \`${keyId}\` does not exist.`)
     const metadata = Object.assign({}, currentKey.metadata, opts.metadata)
     const key = Object.assign(currentKey, pick(opts, KEY_FIELDS), {
       updatedAt: Date.now()

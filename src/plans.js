@@ -1,5 +1,3 @@
-'use strict'
-
 import { pick, uid, validateKey } from './util.js'
 
 export const PLAN_PREFIX = 'plan_'
@@ -22,7 +20,7 @@ export default ({ serialize, deserialize, redis } = {}) => {
    * @param {number} [options.throttle.rateLimit] - The rate limit of the plan.
    * @param {Object} [options.metadata] - Any extra information can be attached here.
    *
-   * @returns {Object} The created plan.
+   * @returns {Object|null} The plan object, null if it doesn't exist.
    */
   const create = async (opts = {}) => {
     if (!opts.name) throw TypeError('The argument `name` is required.')
@@ -58,7 +56,9 @@ export default ({ serialize, deserialize, redis } = {}) => {
     { throwError = false, validate = true } = {}
   ) => {
     const plan = await redis.get(getKey(planId, { validate }))
-    if (plan === null && throwError) { throw new TypeError(`The plan \`${planId}\` does not exist.`) }
+    if (plan === null && throwError) {
+      throw new TypeError(`The plan \`${planId}\` does not exist.`)
+    }
     return deserialize(plan)
   }
 
@@ -71,8 +71,12 @@ export default ({ serialize, deserialize, redis } = {}) => {
    * @returns {boolean} Whether the plan was deleted or not.
    */
   const del = async planId => {
-    const isDeleted = Boolean(await redis.del(getKey(planId, { validate: true })))
-    if (!isDeleted) throw new TypeError(`The plan \`${planId}\` does not exist.`)
+    const isDeleted = Boolean(
+      await redis.del(getKey(planId, { validate: true }))
+    )
+    if (!isDeleted) {
+      throw new TypeError(`The plan \`${planId}\` does not exist.`)
+    }
     return isDeleted
   }
 

@@ -25,6 +25,6 @@ export const validateKey =
   ({ prefix }) =>
     (id, { validate = true } = {}) => {
       if (!validate) return id
-      if (!id.startsWith(prefix)) throw new TypeError(`The id \`${id}\` must to start with \`${prefix}\`.`)
+      if (!String(id).startsWith(prefix)) { throw new TypeError(`The id \`${id}\` must to start with \`${prefix}\`.`) }
       return id
     }
