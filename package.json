@@ -1,6 +1,6 @@
 {
   "name": "openkey",
-  "description": "an AWS Gateway replacement for usage plans and keys for your HTTP API endpoint",
+  "description": "authentication & rate limit for HTTP backed in Redis.",
   "homepage": "https://github.com/microlinkhq/openkey",
   "version": "0.0.0",
   "type": "module",
