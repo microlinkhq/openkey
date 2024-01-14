@@ -1,4 +1,4 @@
-import { pick, uid, validateKey } from './util.js'
+import { pick, uid, validateKey, assert } from './util.js'
 
 export const KEY_PREFIX = 'key_'
 const KEY_FIELDS = ['name', 'description', 'enabled', 'value', 'plan']
@@ -19,16 +19,17 @@ export default ({ serialize, deserialize, plans, redis } = {}) => {
    * @returns {Object} The created key.
    */
   const create = async (opts = {}) => {
-    if (!opts.name) throw TypeError('The argument `name` is required.')
-
+    assert(
+      typeof opts.name === 'string' && opts.name.length > 0,
+      'The argument `name` is required.'
+    )
     const key = pick(opts, KEY_FIELDS.concat(KEY_FIELDS_OBJECT))
     key.id = await uid({ redis, prefix: KEY_PREFIX, size: 5 })
     key.createdAt = key.updatedAt = Date.now()
     key.value = await uid({ redis, size: 16 })
     if (key.enabled === undefined) key.enabled = true
     if (opts.plan) await plans.retrieve(opts.plan, { throwError: true })
-    await redis.setnx(key.id, serialize(key))
-    return key
+    return (await redis.setnx(key.id, serialize(key))) && key
   }
 
   /**
@@ -46,8 +47,8 @@ export default ({ serialize, deserialize, plans, redis } = {}) => {
     { throwError = false, validate = true } = {}
   ) => {
     const key = await redis.get(getKey(keyId, { validate }))
-    if (key === null && throwError) {
-      throw new TypeError(`The key \`${keyId}\` does not exist.`)
+    if (throwError) {
+      assert(key !== null, `The key \`${keyId}\` does not exist.`)
     }
     return deserialize(key)
   }
@@ -61,22 +62,20 @@ export default ({ serialize, deserialize, plans, redis } = {}) => {
    */
   const del = async keyId => {
     const key = await retrieve(keyId, { verify: true })
-
     if (key !== null && typeof key.plan === 'string') {
       const plan = await plans.retrieve(key.plan, {
         throwError: true,
         validate: false
       })
-      if (plan !== null) {
-        throw new TypeError(
-          `The key \`${keyId}\` is associated with the plan \`${getKey.plan}\``
-        )
-      }
+      assert(
+        plan === null,
+        `The key \`${keyId}\` is associated with the plan \`${getKey.plan}\``
+      )
     }
-
     const isDeleted = (await redis.del(getKey(keyId, { verify: true }))) === 1
-    if (!isDeleted) throw new TypeError(`The key \`${keyId}\` does not exist.`)
-    return isDeleted
+    return (
+      assert(isDeleted, `The key \`${keyId}\` does not exist.`) || isDeleted
+    )
   }
 
   /**
@@ -100,8 +99,7 @@ export default ({ serialize, deserialize, plans, redis } = {}) => {
     })
     if (Object.keys(metadata).length) key.metadata = metadata
     if (key.plan) await plans.retrieve(key.plan, { throwError: true })
-    await redis.set(keyId, serialize(key))
-    return key
+    return (await redis.set(keyId, serialize(key))) && key
   }
 
   /**
