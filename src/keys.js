@@ -19,10 +19,7 @@ export default ({ serialize, deserialize, plans, redis } = {}) => {
    * @returns {Object} The created key.
    */
   const create = async (opts = {}) => {
-    assert(
-      typeof opts.name === 'string' && opts.name.length > 0,
-      'The argument `name` is required.'
-    )
+    assert(typeof opts.name === 'string' && opts.name.length > 0, 'The argument `name` is required.')
     const key = pick(opts, KEY_FIELDS.concat(KEY_FIELDS_OBJECT))
     key.id = await uid({ redis, prefix: KEY_PREFIX, size: 5 })
     key.createdAt = key.updatedAt = Date.now()
@@ -42,10 +39,7 @@ export default ({ serialize, deserialize, plans, redis } = {}) => {
    *
    * @returns {Object|null} The key object, null if it doesn't exist.
    */
-  const retrieve = async (
-    keyId,
-    { throwError = false, validate = true } = {}
-  ) => {
+  const retrieve = async (keyId, { throwError = false, validate = true } = {}) => {
     const key = await redis.get(getKey(keyId, { validate }))
     if (throwError) {
       assert(key !== null, `The key \`${keyId}\` does not exist.`)
@@ -67,15 +61,10 @@ export default ({ serialize, deserialize, plans, redis } = {}) => {
         throwError: true,
         validate: false
       })
-      assert(
-        plan === null,
-        `The key \`${keyId}\` is associated with the plan \`${getKey.plan}\``
-      )
+      assert(plan === null, `The key \`${keyId}\` is associated with the plan \`${getKey.plan}\``)
     }
     const isDeleted = (await redis.del(getKey(keyId, { verify: true }))) === 1
-    return (
-      assert(isDeleted, `The key \`${keyId}\` does not exist.`) || isDeleted
-    )
+    return assert(isDeleted, `The key \`${keyId}\` does not exist.`) || isDeleted
   }
 
   /**
@@ -109,9 +98,7 @@ export default ({ serialize, deserialize, plans, redis } = {}) => {
    */
   const list = async () => {
     const keyIds = await redis.keys(`${KEY_PREFIX}*`)
-    return Promise.all(
-      keyIds.map(keyIds => retrieve(keyIds, { validate: false }))
-    )
+    return Promise.all(keyIds.map(keyIds => retrieve(keyIds, { validate: false })))
   }
 
   const getKey = validateKey({ prefix: KEY_PREFIX })

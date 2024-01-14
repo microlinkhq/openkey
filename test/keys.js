@@ -23,18 +23,14 @@ test('.create # `name` is required', async t => {
 })
 
 test('.create # error if plan is invalid', async t => {
-  const error = await t.throwsAsync(
-    keys.create({ name: 'hello@microlink.io', plan: 123 })
-  )
+  const error = await t.throwsAsync(keys.create({ name: 'hello@microlink.io', plan: 123 }))
 
   t.is(error.message, 'The id `123` must to start with `plan_`.')
   t.is(error.name, 'TypeError')
 })
 
 test('.create # error if plan does not exist', async t => {
-  const error = await t.throwsAsync(
-    keys.create({ name: 'hello@microlink.io', plan: 'plan_123' })
-  )
+  const error = await t.throwsAsync(keys.create({ name: 'hello@microlink.io', plan: 'plan_123' }))
 
   t.is(error.message, 'The plan `plan_123` does not exist.')
   t.is(error.name, 'TypeError')

@@ -3,10 +3,7 @@ import { getRandomValues } from 'crypto'
 const BASE_58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 
 const rand = size =>
-  getRandomValues(new Uint8Array(size)).reduce(
-    (id, value) => id + BASE_58.charAt(value % BASE_58.length),
-    ''
-  )
+  getRandomValues(new Uint8Array(size)).reduce((id, value) => id + BASE_58.charAt(value % BASE_58.length), '')
 
 export const uid = async ({ redis, prefix = '', size }) => {
   let uid
