@@ -1,3 +1,4 @@
+import assert from 'node:assert/strict'
 import { getRandomValues } from 'crypto'
 
 const BASE_58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
@@ -25,6 +26,9 @@ export const validateKey =
   ({ prefix }) =>
     (id, { validate = true } = {}) => {
       if (!validate) return id
-      if (!String(id).startsWith(prefix)) { throw new TypeError(`The id \`${id}\` must to start with \`${prefix}\`.`) }
+      assert(
+        String(id).startsWith(prefix),
+      `The id \`${id}\` must to start with \`${prefix}\`.`
+      )
       return id
     }

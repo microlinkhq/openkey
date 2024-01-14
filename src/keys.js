@@ -1,3 +1,5 @@
+import assert from 'node:assert/strict'
+
 import { pick, uid, validateKey } from './util.js'
 
 export const KEY_PREFIX = 'key_'
@@ -19,7 +21,7 @@ export default ({ serialize, deserialize, plans, redis } = {}) => {
    * @returns {Object} The created key.
    */
   const create = async (opts = {}) => {
-    if (!opts.name) throw TypeError('The argument `name` is required.')
+    assert(opts.name, 'The argument `name` is required.')
 
     const key = pick(opts, KEY_FIELDS.concat(KEY_FIELDS_OBJECT))
     key.id = await uid({ redis, prefix: KEY_PREFIX, size: 5 })
@@ -46,9 +48,7 @@ export default ({ serialize, deserialize, plans, redis } = {}) => {
     { throwError = false, validate = true } = {}
   ) => {
     const key = await redis.get(getKey(keyId, { validate }))
-    if (key === null && throwError) {
-      throw new TypeError(`The key \`${keyId}\` does not exist.`)
-    }
+    if (throwError) assert(key, `The key \`${keyId}\` does not exist.`)
     return deserialize(key)
   }
 
@@ -67,16 +67,16 @@ export default ({ serialize, deserialize, plans, redis } = {}) => {
         throwError: true,
         validate: false
       })
-      if (plan !== null) {
-        throw new TypeError(
-          `The key \`${keyId}\` is associated with the plan \`${getKey.plan}\``
-        )
-      }
+      assert(
+        !plan,
+        `The key \`${keyId}\` is associated with the plan \`${getKey.plan}\``
+      )
     }
 
     const isDeleted = (await redis.del(getKey(keyId, { verify: true }))) === 1
-    if (!isDeleted) throw new TypeError(`The key \`${keyId}\` does not exist.`)
-    return isDeleted
+    return (
+      assert(isDeleted, `The key \`${keyId}\` does not exist.`) || isDeleted
+    )
   }
 
   /**

@@ -17,7 +17,7 @@ test.beforeEach(async () => {
 test('.create # `name` is required', async t => {
   const error = await t.throwsAsync(plans.create())
   t.is(error.message, 'The argument `name` is required.')
-  t.is(error.name, 'TypeError')
+  t.is(error.name, 'AssertionError')
 })
 
 test('.create # `quota` is required', async t => {
@@ -27,7 +27,7 @@ test('.create # `quota` is required', async t => {
       error.message,
       'The argument `quota.period` must be `day` or `week` or `month`.'
     )
-    t.is(error.name, 'TypeError')
+    t.is(error.name, 'AssertionError')
   }
   {
     const error = await t.throwsAsync(
@@ -37,7 +37,7 @@ test('.create # `quota` is required', async t => {
       error.message,
       'The argument `quota.period` must be `day` or `week` or `month`.'
     )
-    t.is(error.name, 'TypeError')
+    t.is(error.name, 'AssertionError')
   }
   {
     const error = await t.throwsAsync(
@@ -47,21 +47,21 @@ test('.create # `quota` is required', async t => {
       error.message,
       'The argument `quota.period` must be `day` or `week` or `month`.'
     )
-    t.is(error.name, 'TypeError')
+    t.is(error.name, 'AssertionError')
   }
   {
     const error = await t.throwsAsync(
       plans.create({ name: 'free tier', quota: { period: 'week' } })
     )
     t.is(error.message, 'The argument `quota.limit` must be a positive number.')
-    t.is(error.name, 'TypeError')
+    t.is(error.name, 'AssertionError')
   }
   {
     const error = await t.throwsAsync(
       plans.create({ name: 'free tier', quota: { period: 'week', limit: 0 } })
     )
     t.is(error.message, 'The argument `quota.limit` must be a positive number.')
-    t.is(error.name, 'TypeError')
+    t.is(error.name, 'AssertionError')
   }
 })
 
@@ -145,12 +145,12 @@ test('.update # error if plan does not exist', async t => {
   {
     const error = await t.throwsAsync(plans.update('id', { foo: 'bar' }))
     t.is(error.message, 'The id `id` must to start with `plan_`.')
-    t.is(error.name, 'TypeError')
+    t.is(error.name, 'AssertionError')
   }
   {
     const error = await t.throwsAsync(plans.update('plan_id', { foo: 'bar' }))
     t.is(error.message, 'The plan `plan_id` does not exist.')
-    t.is(error.name, 'TypeError')
+    t.is(error.name, 'AssertionError')
   }
 })
 
@@ -187,5 +187,5 @@ test('.del', async t => {
 test('.del # error if plan does not exist', async t => {
   const error = await t.throwsAsync(plans.del('plan_id'))
   t.is(error.message, 'The plan `plan_id` does not exist.')
-  t.is(error.name, 'TypeError')
+  t.is(error.name, 'AssertionError')
 })

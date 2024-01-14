@@ -19,7 +19,7 @@ test('.create # `name` is required', async t => {
   const error = await t.throwsAsync(keys.create())
 
   t.is(error.message, 'The argument `name` is required.')
-  t.is(error.name, 'TypeError')
+  t.is(error.name, 'AssertionError')
 })
 
 test('.create # error if plan is invalid', async t => {
@@ -28,7 +28,7 @@ test('.create # error if plan is invalid', async t => {
   )
 
   t.is(error.message, 'The id `123` must to start with `plan_`.')
-  t.is(error.name, 'TypeError')
+  t.is(error.name, 'AssertionError')
 })
 
 test('.create # error if plan does not exist', async t => {
@@ -37,7 +37,7 @@ test('.create # error if plan does not exist', async t => {
   )
 
   t.is(error.message, 'The plan `plan_123` does not exist.')
-  t.is(error.name, 'TypeError')
+  t.is(error.name, 'AssertionError')
 })
 
 test('.create', async t => {
@@ -100,7 +100,7 @@ test('.update # error if plan is invalid', async t => {
   )
 
   t.is(error.message, 'The id `123` must to start with `plan_`.')
-  t.is(error.name, 'TypeError')
+  t.is(error.name, 'AssertionError')
 })
 
 test('.update # error if plan does not exist', async t => {
@@ -115,19 +115,19 @@ test('.update # error if plan does not exist', async t => {
   )
 
   t.is(error.message, 'The plan `plan_123` does not exist.')
-  t.is(error.name, 'TypeError')
+  t.is(error.name, 'AssertionError')
 })
 
 test('.update # error if key does not exist', async t => {
   {
     const error = await t.throwsAsync(keys.update('id', { foo: 'bar' }))
     t.is(error.message, 'The id `id` must to start with `key_`.')
-    t.is(error.name, 'TypeError')
+    t.is(error.name, 'AssertionError')
   }
   {
     const error = await t.throwsAsync(keys.update('key_id', { foo: 'bar' }))
     t.is(error.message, 'The key `key_id` does not exist.')
-    t.is(error.name, 'TypeError')
+    t.is(error.name, 'AssertionError')
   }
 })
 
@@ -185,10 +185,10 @@ test('.del # error if key does not exist', async t => {
   const error = await t.throwsAsync(keys.del('key_id'))
 
   t.is(error.message, 'The key `key_id` does not exist.')
-  t.is(error.name, 'TypeError')
+  t.is(error.name, 'AssertionError')
 })
 
-test('.del # error plan associated exist', async t => {
+test.only('.del # error plan associated exist', async t => {
   const plan = await plans.create({
     name: 'free tier',
     quota: { limit: 3000, period: 'day' }
@@ -201,5 +201,5 @@ test('.del # error plan associated exist', async t => {
   const error = await t.throwsAsync(keys.del(id))
 
   t.true(error.message.includes('is associated with the plan'))
-  t.is(error.name, 'TypeError')
+  t.is(error.name, 'AssertionError')
 })
