@@ -37,8 +37,7 @@ export default ({ serialize, deserialize, redis } = {}) => {
     const plan = pick(opts, PLAN_FIELDS.concat(PLAN_FIELDS_OBJECT))
     plan.id = await uid({ redis, prefix: PLAN_PREFIX, size: 5 })
     plan.createdAt = plan.updatedAt = Date.now()
-    await redis.setnx(plan.id, serialize(plan))
-    return plan
+    return (await redis.setnx(plan.id, serialize(plan))) && plan
   }
 
   /**
@@ -71,9 +70,8 @@ export default ({ serialize, deserialize, redis } = {}) => {
    * @returns {boolean} Whether the plan was deleted or not.
    */
   const del = async planId => {
-    const isDeleted = Boolean(
-      await redis.del(getKey(planId, { validate: true }))
-    )
+    const isDeleted =
+      (await redis.del(getKey(planId, { validate: true }))) === 1
     if (!isDeleted) {
       throw new TypeError(`The plan \`${planId}\` does not exist.`)
     }
@@ -106,8 +104,7 @@ export default ({ serialize, deserialize, redis } = {}) => {
       updatedAt: Date.now()
     })
     if (Object.keys(metadata).length) plan.metadata = metadata
-    await redis.set(planId, serialize(plan))
-    return plan
+    return (await redis.set(planId, serialize(plan))) && plan
   }
 
   /**

@@ -27,8 +27,7 @@ export default ({ serialize, deserialize, plans, redis } = {}) => {
     key.value = await uid({ redis, size: 16 })
     if (key.enabled === undefined) key.enabled = true
     if (opts.plan) await plans.retrieve(opts.plan, { throwError: true })
-    await redis.setnx(key.id, serialize(key))
-    return key
+    return (await redis.setnx(key.id, serialize(key))) && key
   }
 
   /**
@@ -100,8 +99,7 @@ export default ({ serialize, deserialize, plans, redis } = {}) => {
     })
     if (Object.keys(metadata).length) key.metadata = metadata
     if (key.plan) await plans.retrieve(key.plan, { throwError: true })
-    await redis.set(keyId, serialize(key))
-    return key
+    return (await redis.set(keyId, serialize(key))) && key
   }
 
   /**
