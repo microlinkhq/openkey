@@ -1,4 +1,4 @@
-import { pick, uid, validateKey } from './util.js'
+import { pick, uid, validateKey, assert } from './util.js'
 
 export const PLAN_PREFIX = 'plan_'
 const PLAN_QUOTA_PERIODS = ['day', 'week', 'month']
@@ -23,17 +23,20 @@ export default ({ serialize, deserialize, redis } = {}) => {
    * @returns {Object|null} The plan object, null if it doesn't exist.
    */
   const create = async (opts = {}) => {
-    if (!opts.name) throw TypeError('The argument `name` is required.')
-    if (!PLAN_QUOTA_PERIODS.includes(opts.quota?.period)) {
-      throw TypeError(
-        `The argument \`quota.period\` must be ${PLAN_QUOTA_PERIODS.map(
-          period => `\`${period}\``
-        ).join(' or ')}.`
-      )
-    }
-    if (!opts.quota?.limit) {
-      throw TypeError('The argument `quota.limit` must be a positive number.')
-    }
+    assert(
+      typeof opts.name === 'string' && opts.name.length > 0,
+      'The argument `name` is required.'
+    )
+    assert(
+      PLAN_QUOTA_PERIODS.includes(opts.quota?.period),
+      `The argument \`quota.period\` must be ${PLAN_QUOTA_PERIODS.map(
+        period => `\`${period}\``
+      ).join(' or ')}.`
+    )
+    assert(
+      opts.quota.limit > 0,
+      'The argument `quota.limit` must be a positive number.'
+    )
     const plan = pick(opts, PLAN_FIELDS.concat(PLAN_FIELDS_OBJECT))
     plan.id = await uid({ redis, prefix: PLAN_PREFIX, size: 5 })
     plan.createdAt = plan.updatedAt = Date.now()
@@ -55,8 +58,8 @@ export default ({ serialize, deserialize, redis } = {}) => {
     { throwError = false, validate = true } = {}
   ) => {
     const plan = await redis.get(getKey(planId, { validate }))
-    if (plan === null && throwError) {
-      throw new TypeError(`The plan \`${planId}\` does not exist.`)
+    if (throwError) {
+      assert(plan !== null, `The plan \`${planId}\` does not exist.`)
     }
     return deserialize(plan)
   }
@@ -72,10 +75,9 @@ export default ({ serialize, deserialize, redis } = {}) => {
   const del = async planId => {
     const isDeleted =
       (await redis.del(getKey(planId, { validate: true }))) === 1
-    if (!isDeleted) {
-      throw new TypeError(`The plan \`${planId}\` does not exist.`)
-    }
-    return isDeleted
+    return (
+      assert(isDeleted, `The plan \`${planId}\` does not exist.`) || isDeleted
+    )
   }
 
   /**

@@ -21,10 +21,18 @@ export const pick = (obj, keys) => {
   return result
 }
 
+export const assert = (value, message) =>
+  value ||
+  (() => {
+    throw new TypeError(message)
+  })()
+
 export const validateKey =
   ({ prefix }) =>
     (id, { validate = true } = {}) => {
       if (!validate) return id
-      if (!String(id).startsWith(prefix)) { throw new TypeError(`The id \`${id}\` must to start with \`${prefix}\`.`) }
+      if (!String(id).startsWith(prefix)) {
+        throw new TypeError(`The id \`${id}\` must to start with \`${prefix}\`.`)
+      }
       return id
     }
