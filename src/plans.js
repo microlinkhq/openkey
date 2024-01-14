@@ -107,11 +107,5 @@ export default ({ serialize, deserialize, redis } = {}) => {
 
   const getKey = validateKey({ prefix: PLAN_PREFIX })
 
-  return {
-    create,
-    del,
-    retrieve,
-    update,
-    list
-  }
+  return { create, del, retrieve, update, list }
 }
