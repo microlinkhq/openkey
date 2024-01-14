@@ -1,6 +1,6 @@
 <div align="center">
-  <img src="https://github.com/microlinkhq/openkey/raw/master/design/banner.jpg#gh-light-mode-only" alt="microlink logo">
-  <img src="https://github.com/microlinkhq/openkey/raw/master/design/banner.jpg#gh-dark-mode-only" alt="microlink logo">
+  <img src="https://github.com/microlinkhq/openkey/raw/master/design/banner.png#gh-light-mode-only" alt="microlink logo">
+  <img src="https://github.com/microlinkhq/openkey/raw/master/design/banner-dark.png#gh-dark-mode-only" alt="microlink logo">
 </div>
 
 ![Last version](https://img.shields.io/github/tag/microlinkhq/openkey.svg?style=flat-square)
@@ -25,8 +25,9 @@ $ npm install openkey
 ## Concepts
 
 <div align="center">
-  <img src="https://github.com/microlinkhq/openkey/raw/master/design/concepts.jpg#gh-light-mode-only" alt="microlink logo">
-  <img src="https://github.com/microlinkhq/openkey/raw/master/design/concepts.jpg#gh-dark-mode-only" alt="microlink logo">
+  <img src="https://github.com/microlinkhq/openkey/raw/master/design/concepts.png#gh-light-mode-only" alt="microlink logo">
+  <img src="https://github.com/microlinkhq/openkey/raw/master/design/concepts-dark.png#gh-dark-mode-only" alt="microlink logo">
+  <br>
 </div>
 
 **openkey** orbits around three concepts:
