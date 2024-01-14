@@ -23,20 +23,12 @@ export default ({ serialize, deserialize, redis } = {}) => {
    * @returns {Object|null} The plan object, null if it doesn't exist.
    */
   const create = async (opts = {}) => {
-    assert(
-      typeof opts.name === 'string' && opts.name.length > 0,
-      'The argument `name` is required.'
-    )
+    assert(typeof opts.name === 'string' && opts.name.length > 0, 'The argument `name` is required.')
     assert(
       PLAN_QUOTA_PERIODS.includes(opts.quota?.period),
-      `The argument \`quota.period\` must be ${PLAN_QUOTA_PERIODS.map(
-        period => `\`${period}\``
-      ).join(' or ')}.`
+      `The argument \`quota.period\` must be ${PLAN_QUOTA_PERIODS.map(period => `\`${period}\``).join(' or ')}.`
     )
-    assert(
-      opts.quota.limit > 0,
-      'The argument `quota.limit` must be a positive number.'
-    )
+    assert(opts.quota.limit > 0, 'The argument `quota.limit` must be a positive number.')
     const plan = pick(opts, PLAN_FIELDS.concat(PLAN_FIELDS_OBJECT))
     plan.id = await uid({ redis, prefix: PLAN_PREFIX, size: 5 })
     plan.createdAt = plan.updatedAt = Date.now()
@@ -53,10 +45,7 @@ export default ({ serialize, deserialize, redis } = {}) => {
    *
    * @returns {Object} The plan.
    */
-  const retrieve = async (
-    planId,
-    { throwError = false, validate = true } = {}
-  ) => {
+  const retrieve = async (planId, { throwError = false, validate = true } = {}) => {
     const plan = await redis.get(getKey(planId, { validate }))
     if (throwError) {
       assert(plan !== null, `The plan \`${planId}\` does not exist.`)
@@ -73,11 +62,8 @@ export default ({ serialize, deserialize, redis } = {}) => {
    * @returns {boolean} Whether the plan was deleted or not.
    */
   const del = async planId => {
-    const isDeleted =
-      (await redis.del(getKey(planId, { validate: true }))) === 1
-    return (
-      assert(isDeleted, `The plan \`${planId}\` does not exist.`) || isDeleted
-    )
+    const isDeleted = (await redis.del(getKey(planId, { validate: true }))) === 1
+    return assert(isDeleted, `The plan \`${planId}\` does not exist.`) || isDeleted
   }
 
   /**
@@ -116,9 +102,7 @@ export default ({ serialize, deserialize, redis } = {}) => {
    */
   const list = async () => {
     const planIds = await redis.keys(`${PLAN_PREFIX}*`)
-    return Promise.all(
-      planIds.map(planId => retrieve(planId, { validate: false }))
-    )
+    return Promise.all(planIds.map(planId => retrieve(planId, { validate: false })))
   }
 
   const getKey = validateKey({ prefix: PLAN_PREFIX })
