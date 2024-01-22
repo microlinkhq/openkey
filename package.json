@@ -36,7 +36,7 @@
     "@commitlint/cli": "latest",
     "@commitlint/config-conventional": "latest",
     "@ksmithut/prettier-standard": "latest",
-    "ava": "5",
+    "ava": "6",
     "c8": "latest",
     "ci-publish": "latest",
     "github-generate-release": "latest",
