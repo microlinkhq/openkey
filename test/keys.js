@@ -1,9 +1,11 @@
-import { setTimeout } from 'timers/promises'
-import openkey from 'openkey'
-import Redis from 'ioredis'
-import test from 'ava'
+'use strict'
 
-import { KEY_PREFIX } from 'openkey/keys'
+const { setTimeout } = require('timers/promises')
+const openkey = require('openkey')
+const Redis = require('ioredis')
+const test = require('ava')
+
+const { KEY_PREFIX } = require('openkey/keys')
 
 const redis = new Redis()
 

@@ -1,11 +1,13 @@
-import { pick, uid, validateKey, assert } from './util.js'
+'use strict'
 
-export const PLAN_PREFIX = 'plan_'
+const { pick, uid, validateKey, assert } = require('./util')
+
+const PLAN_PREFIX = 'plan_'
 const PLAN_QUOTA_PERIODS = ['day', 'week', 'month']
 const PLAN_FIELDS = ['name', 'description']
 const PLAN_FIELDS_OBJECT = ['quota', 'throttle', 'metadata']
 
-export default ({ serialize, deserialize, redis } = {}) => {
+module.exports = ({ serialize, deserialize, redis } = {}) => {
   /**
    * Create a plan.
    *
@@ -109,3 +111,5 @@ export default ({ serialize, deserialize, redis } = {}) => {
 
   return { create, del, retrieve, update, list }
 }
+
+module.exports.PLAN_PREFIX = PLAN_PREFIX
