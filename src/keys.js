@@ -1,10 +1,12 @@
-import { pick, uid, validateKey, assert } from './util.js'
+'use strict'
 
-export const KEY_PREFIX = 'key_'
+const { pick, uid, validateKey, assert } = require('./util')
+
+const KEY_PREFIX = 'key_'
 const KEY_FIELDS = ['name', 'description', 'enabled', 'value', 'plan']
 const KEY_FIELDS_OBJECT = ['metadata']
 
-export default ({ serialize, deserialize, plans, redis } = {}) => {
+module.exports = ({ serialize, deserialize, plans, redis } = {}) => {
   /**
    * Create a key.
    *
@@ -105,3 +107,5 @@ export default ({ serialize, deserialize, plans, redis } = {}) => {
 
   return { create, retrieve, del, update, list }
 }
+
+module.exports.KEY_PREFIX = KEY_PREFIX

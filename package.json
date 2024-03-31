@@ -3,7 +3,6 @@
   "description": "authentication & rate limit for HTTP backed in Redis.",
   "homepage": "https://github.com/microlinkhq/openkey",
   "version": "0.0.0",
-  "type": "module",
   "exports": {
     ".": "./src/index.js",
     "./plans": "./src/plans.js",
@@ -13,8 +12,8 @@
     "openkey": "bin/index.js"
   },
   "author": {
-    "name": "microlink.io",
     "email": "hello@microlink.io",
+    "name": "microlink.io",
     "url": "https://microlink.io"
   },
   "repository": {
@@ -28,20 +27,17 @@
   "dependencies": {
     "mri": "~1.2.0"
   },
-  "files": [
-    "src"
-  ],
   "devDependencies": {
-    "ioredis": "latest",
     "@commitlint/cli": "latest",
     "@commitlint/config-conventional": "latest",
     "@ksmithut/prettier-standard": "latest",
     "ava": "5",
     "c8": "latest",
     "ci-publish": "latest",
-    "github-generate-release": "latest",
     "finepack": "latest",
     "git-authors-cli": "latest",
+    "github-generate-release": "latest",
+    "ioredis": "latest",
     "nano-staged": "latest",
     "npm-check-updates": "latest",
     "simple-git-hooks": "latest",
@@ -52,6 +48,9 @@
   "engines": {
     "node": ">= 18"
   },
+  "files": [
+    "src"
+  ],
   "scripts": {
     "clean": "rm -rf node_modules",
     "contributors": "(npx git-authors-cli && npx finepack && git add package.json && git commit -m 'build: contributors' --no-verify) || true",
