@@ -1,6 +1,6 @@
 'use strict'
 
-const { pick, uid, validateKey, assert } = require('./util')
+const { pick, uid, validateKey, assert, assertMetadata } = require('./util')
 
 const PLAN_PREFIX = 'plan_'
 const PLAN_QUOTA_PERIODS = ['day', 'week', 'month']
@@ -22,7 +22,7 @@ module.exports = ({ serialize, deserialize, redis } = {}) => {
    * @param {number} [options.throttle.rateLimit] - The rate limit of the plan.
    * @param {Object} [options.metadata] - Any extra information can be attached here.
    *
-   * @returns {Object|null} The plan object, null if it doesn't exist.
+   * @returns {Object} The plan object.
    */
   const create = async (opts = {}) => {
     assert(typeof opts.name === 'string' && opts.name.length > 0, 'The argument `name` is required.')
@@ -31,6 +31,7 @@ module.exports = ({ serialize, deserialize, redis } = {}) => {
       `The argument \`quota.period\` must be ${PLAN_QUOTA_PERIODS.map(period => `\`${period}\``).join(' or ')}.`
     )
     assert(opts.quota.limit > 0, 'The argument `quota.limit` must be a positive number.')
+    opts.metadata = assertMetadata(opts.metadata)
     const plan = pick(opts, PLAN_FIELDS.concat(PLAN_FIELDS_OBJECT))
     plan.id = await uid({ redis, prefix: PLAN_PREFIX, size: 5 })
     plan.createdAt = plan.updatedAt = Date.now()
@@ -88,7 +89,7 @@ module.exports = ({ serialize, deserialize, redis } = {}) => {
   const update = async (planId, opts) => {
     const currentPlan = await retrieve(planId, { throwError: true })
     const quota = Object.assign(currentPlan.quota, opts.quota)
-    const metadata = Object.assign({}, currentPlan.metadata, opts.metadata)
+    const metadata = Object.assign({}, currentPlan.metadata, assertMetadata(opts.metadata))
     const plan = Object.assign(currentPlan, pick(opts, PLAN_FIELDS), {
       quota,
       updatedAt: Date.now()

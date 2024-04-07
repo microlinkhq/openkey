@@ -36,9 +36,30 @@ const validateKey =
       return id
     }
 
+const assertMetadata = metadata => {
+  if (metadata) {
+    assert(isPlainObject(metadata), 'The metadata must be a flat object.')
+    Object.keys(metadata).forEach(key => {
+      assert(!isPlainObject(metadata[key]), `The metadata field '${key}' can't be an object.`)
+      if (metadata[key] === undefined) delete metadata[key]
+    })
+    return Object.keys(metadata).length ? metadata : undefined
+  }
+}
+
+const isPlainObject = value => {
+  if (!value || typeof value !== 'object' || value.toString() !== '[object Object]') {
+    return false
+  }
+
+  const prototype = Object.getPrototypeOf(value)
+  return prototype === null || prototype === Object.prototype
+}
+
 module.exports = {
-  uid,
-  pick,
   assert,
+  assertMetadata,
+  pick,
+  uid,
   validateKey
 }

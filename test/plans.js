@@ -50,6 +50,51 @@ test('.create # `quota` is required', async t => {
   }
 })
 
+test('.create # `metadata` must be a flat object', async t => {
+  {
+    const error = await t.throwsAsync(
+      plans.create({
+        name: 'free tier',
+        quota: { period: 'week', limit: 1000 },
+        metadata: { tier: { type: 'new' } }
+      })
+    )
+    t.is(error.message, "The metadata field 'tier' can't be an object.")
+    t.is(error.name, 'TypeError')
+  }
+  {
+    const error = await t.throwsAsync(
+      plans.create({
+        name: 'free tier',
+        quota: { period: 'week', limit: 1000 },
+        metadata: 'foo'
+      })
+    )
+    t.is(error.message, 'The metadata must be a flat object.')
+    t.is(error.name, 'TypeError')
+  }
+})
+
+test('.create # `metadata` as undefined is omitted', async t => {
+  {
+    const plan = await plans.create({
+      name: 'free tier',
+      quota: { period: 'week', limit: 1000 },
+      metadata: { tier: undefined }
+    })
+    t.is(plan.metadata, undefined)
+  }
+  {
+    const plan = await plans.create({
+      name: 'free tier',
+      quota: { period: 'week', limit: 1000 },
+      metadata: { tier: 'free', version: undefined }
+    })
+
+    t.deepEqual(Object.keys(plan.metadata), ['tier'])
+  }
+})
+
 test('.create', async t => {
   const plan = await plans.create({
     name: 'free tier',
@@ -68,7 +113,11 @@ test('.create', async t => {
   t.deepEqual(plan.throttle, { burstLimit: 1000, rateLimit: 10 })
 })
 
-test('.retrieve', async t => {
+test('.retrieve # a plan not previosuly declared', async t => {
+  t.is(await plans.retrieve('plan_1'), null)
+})
+
+test('.retrieve # a plan previosuly declared', async t => {
   const { id } = await plans.create({
     name: 'free tier',
     quota: { limit: 3000, period: 'day' }
@@ -108,13 +157,59 @@ test('.update', async t => {
 })
 
 test('.update # add metadata', async t => {
+  {
+    const { id } = await plans.create({
+      name: 'free tier',
+      quota: { limit: 3000, period: 'day' }
+    })
+
+    const plan = await plans.update(id, { metadata: { tier: 'free' } })
+    t.is(plan.metadata.tier, 'free')
+  }
+  {
+    const { id } = await plans.create({
+      name: 'free tier',
+      quota: { limit: 3000, period: 'day' }
+    })
+
+    await plans.update(id, { metadata: { tier: 'free' } })
+    const plan = await plans.update(id, { metadata: { tier: 'free', version: 2 } })
+    t.is(plan.metadata.tier, 'free')
+    t.is(plan.metadata.version, 2)
+  }
+})
+
+test('.update # metadata must be a flat object', async t => {
   const { id } = await plans.create({
     name: 'free tier',
     quota: { limit: 3000, period: 'day' }
   })
 
-  const plan = await plans.update(id, { metadata: { tier: 'free' } })
-  t.is(plan.metadata.tier, 'free')
+  const error = await t.throwsAsync(plans.update(id, { metadata: { tier: { type: 'new' } } }))
+  t.is(error.message, "The metadata field 'tier' can't be an object.")
+  t.is(error.name, 'TypeError')
+})
+
+test('.update # metadata as undefined is omitted', async t => {
+  {
+    const { id } = await plans.create({
+      name: 'free tier',
+      quota: { limit: 3000, period: 'day' }
+    })
+
+    const plan = await plans.update(id, { metadata: { tier: undefined } })
+    t.is(plan.metadata, undefined)
+  }
+
+  {
+    const { id } = await plans.create({
+      name: 'free tier',
+      quota: { limit: 3000, period: 'day' }
+    })
+
+    const plan = await plans.update(id, { metadata: { tier: 'free', version: undefined } })
+    t.deepEqual(Object.keys(plan.metadata), ['tier'])
+  }
 })
 
 test('.update # prevent to add random data', async t => {
@@ -124,6 +219,17 @@ test('.update # prevent to add random data', async t => {
   })
   const plan = await plans.update(id, { foo: 'bar' })
   t.is(plan.foo, undefined)
+})
+
+test('.update # prevent to modify the plan id', async t => {
+  const { id } = await plans.create({
+    name: 'free tier',
+    quota: { limit: 3000, period: 'day' }
+  })
+
+  const plan = await plans.update(id, { id: 'foo' })
+
+  t.is(plan.id, id)
 })
 
 test('.update # error if plan does not exist', async t => {
