@@ -113,11 +113,11 @@ test('.create', async t => {
   t.deepEqual(plan.throttle, { burstLimit: 1000, rateLimit: 10 })
 })
 
-test('.retrieve # a plan not previosuly created', async t => {
+test('.retrieve # a plan not previously created', async t => {
   t.is(await plans.retrieve('plan_1'), null)
 })
 
-test('.retrieve # a plan previosuly created', async t => {
+test('.retrieve # a plan previously created', async t => {
   const { id } = await plans.create({
     name: 'free tier',
     quota: { limit: 3000, period: 'day' }
@@ -276,6 +276,7 @@ test('.del', async t => {
 
 test('.del # error if plan does not exist', async t => {
   const error = await t.throwsAsync(plans.del('plan_id'))
+
   t.is(error.message, 'The plan `plan_id` does not exist.')
   t.is(error.name, 'TypeError')
 })

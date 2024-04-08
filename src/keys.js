@@ -67,7 +67,8 @@ module.exports = ({ serialize, deserialize, plans, redis } = {}) => {
       assert(plan === null, `The key \`${keyId}\` is associated with the plan \`${getKey.plan}\``)
     }
     const isDeleted = (await redis.del(getKey(keyId, { verify: true }))) === 1
-    return assert(isDeleted, `The key \`${keyId}\` does not exist.`) || isDeleted
+    assert(isDeleted, `The key \`${keyId}\` does not exist.`)
+    return isDeleted
   }
 
   /**

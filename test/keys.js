@@ -13,7 +13,6 @@ const { keys, plans } = openkey({ redis: new Redis() })
 
 test.beforeEach(async () => {
   const keys = await redis.keys(`${KEY_PREFIX}*`)
-
   if (keys.length > 0) await redis.del(keys)
 })
 
@@ -127,6 +126,20 @@ test('.update # error if key is invalid', async t => {
 test('.update # error if key does not exist', async t => {
   const error = await t.throwsAsync(keys.update('key_id'))
   t.is(error.message, 'The key `key_id` does not exist.')
+  t.is(error.name, 'TypeError')
+})
+
+test('.update # error if plan is invalid', async t => {
+  const { id } = await keys.create({ name: 'hello@microlink.io' })
+  const error = await t.throwsAsync(keys.update(id, { plan: 'id' }))
+  t.is(error.message, 'The id `id` must to start with `plan_`.')
+  t.is(error.name, 'TypeError')
+})
+
+test('.update # error if plan does not exist', async t => {
+  const { id } = await keys.create({ name: 'hello@microlink.io' })
+  const error = await t.throwsAsync(keys.update(id, { plan: 'plan_id' }))
+  t.is(error.message, 'The plan `plan_id` does not exist.')
   t.is(error.name, 'TypeError')
 })
 
