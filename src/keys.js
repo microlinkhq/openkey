@@ -1,6 +1,6 @@
 'use strict'
 
-const { pick, uid, validateKey, assert } = require('./util')
+const { pick, uid, validateKey, assert, assertMetadata } = require('./util')
 
 const KEY_PREFIX = 'key_'
 const KEY_FIELDS = ['name', 'description', 'enabled', 'value', 'plan']
@@ -22,6 +22,7 @@ module.exports = ({ serialize, deserialize, plans, redis } = {}) => {
    */
   const create = async (opts = {}) => {
     assert(typeof opts.name === 'string' && opts.name.length > 0, 'The argument `name` is required.')
+    opts.metadata = assertMetadata(opts.metadata)
     const key = pick(opts, KEY_FIELDS.concat(KEY_FIELDS_OBJECT))
     key.id = await uid({ redis, prefix: KEY_PREFIX, size: 5 })
     key.createdAt = key.updatedAt = Date.now()
@@ -66,7 +67,8 @@ module.exports = ({ serialize, deserialize, plans, redis } = {}) => {
       assert(plan === null, `The key \`${keyId}\` is associated with the plan \`${getKey.plan}\``)
     }
     const isDeleted = (await redis.del(getKey(keyId, { verify: true }))) === 1
-    return assert(isDeleted, `The key \`${keyId}\` does not exist.`) || isDeleted
+    assert(isDeleted, `The key \`${keyId}\` does not exist.`)
+    return isDeleted
   }
 
   /**
@@ -84,7 +86,7 @@ module.exports = ({ serialize, deserialize, plans, redis } = {}) => {
    */
   const update = async (keyId, opts) => {
     const currentKey = await retrieve(keyId, { throwError: true })
-    const metadata = Object.assign({}, currentKey.metadata, opts.metadata)
+    const metadata = Object.assign({}, currentKey.metadata, assertMetadata(opts.metadata))
     const key = Object.assign(currentKey, pick(opts, KEY_FIELDS), {
       updatedAt: Date.now()
     })
