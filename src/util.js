@@ -20,27 +20,22 @@ const pick = (obj, keys) => {
   return result
 }
 
+/**
+ * Assert a condition, or throw an error if the condition is falsy.
+ * @param {*} value - The value to assert.
+ * @param {string} message - The error message.
+ */
 const assert = (value, message) =>
   value ||
   (() => {
-    throw new TypeError(message)
+    throw new TypeError(message())
   })()
-
-const validateKey =
-  ({ prefix }) =>
-    (id, { validate = true } = {}) => {
-      if (!validate) return id
-      if (!String(id).startsWith(prefix)) {
-        throw new TypeError(`The id \`${id}\` must to start with \`${prefix}\`.`)
-      }
-      return id
-    }
 
 const assertMetadata = metadata => {
   if (metadata) {
-    assert(isPlainObject(metadata), 'The metadata must be a flat object.')
+    assert(isPlainObject(metadata), () => 'The metadata must be a flat object.')
     Object.keys(metadata).forEach(key => {
-      assert(!isPlainObject(metadata[key]), `The metadata field '${key}' can't be an object.`)
+      assert(!isPlainObject(metadata[key]), () => `The metadata field '${key}' can't be an object.`)
       if (metadata[key] === undefined) delete metadata[key]
     })
     return Object.keys(metadata).length ? metadata : undefined
@@ -60,6 +55,5 @@ module.exports = {
   assert,
   assertMetadata,
   pick,
-  uid,
-  validateKey
+  uid
 }
