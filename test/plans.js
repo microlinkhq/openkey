@@ -52,6 +52,16 @@ test('.create # `id` is required', async t => {
   }
 })
 
+test('.create # the `id` already exist', async t => {
+  const id = randomUUID()
+  const props = { id, limit: 1, period: '1s', metadata: { tier: undefined } }
+  const plan = await plans.create(props)
+  t.is(typeof plan, 'object')
+  const error = await t.throwsAsync(plans.create(props))
+  t.is(error.message, `The plan \`${id}\` already exists.`)
+  t.is(error.name, 'TypeError')
+})
+
 test('.create # `id` cannot contain whitespaces', async t => {
   const error = await t.throwsAsync(plans.create({ id: 'free tier' }))
   t.is(error.message, 'The argument `id` cannot contain whitespace.')

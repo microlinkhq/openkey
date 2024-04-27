@@ -1,7 +1,7 @@
 {
   "name": "openkey",
   "description": "authentication & rate limit for HTTP backed in Redis.",
-  "homepage": "https://github.com/microlinkhq/openkey",
+  "homepage": "https://openkey.js.org",
   "version": "0.0.0",
   "exports": {
     ".": "./src/index.js",
@@ -31,7 +31,10 @@
   },
   "keywords": [],
   "dependencies": {
-    "mri": "~1.2.0"
+    "http-body": "~1.0.11",
+    "mri": "~1.2.0",
+    "ms": "~2.1.3",
+    "send-http": "~1.0.6"
   },
   "devDependencies": {
     "@commitlint/cli": "latest",
@@ -77,7 +80,12 @@
   "commitlint": {
     "extends": [
       "@commitlint/config-conventional"
-    ]
+    ],
+    "rules": {
+      "body-max-length": [
+        0
+      ]
+    }
   },
   "nano-staged": {
     "*.js": [
