@@ -17,7 +17,7 @@ testCleanup({
   keys: () => Promise.all([redis.keys(openkey.plans.prefixKey('*'))])
 })
 
-test('.create # `id` is required', async t => {
+test('.create # error is `id` is not provided', async t => {
   {
     const error = await t.throwsAsync(openkey.plans.create())
     t.is(error.message, 'The argument `id` must be a string.')
@@ -50,7 +50,7 @@ test('.create # `id` is required', async t => {
   }
 })
 
-test('.create # the `id` already exist', async t => {
+test('.create # error if `id` already exist', async t => {
   const id = randomUUID()
   const props = { id, limit: 1, period: '1s', metadata: { tier: undefined } }
   const plan = await openkey.plans.create(props)
@@ -60,25 +60,25 @@ test('.create # the `id` already exist', async t => {
   t.is(error.name, 'TypeError')
 })
 
-test('.create # `id` cannot contain whitespaces', async t => {
+test('.create # error if `id` contains whitespaces', async t => {
   const error = await t.throwsAsync(openkey.plans.create({ id: 'free tier' }))
   t.is(error.message, 'The argument `id` cannot contain whitespace.')
   t.is(error.name, 'TypeError')
 })
 
-test('.create # `limit` is required', async t => {
+test('.create # error if `limit` is not provided', async t => {
   const error = await t.throwsAsync(openkey.plans.create({ id: randomUUID() }))
   t.is(error.message, 'The argument `limit` must be a positive number.')
   t.is(error.name, 'TypeError')
 })
 
-test('.create # `period` is required', async t => {
+test('.create # error if `period` is not provided', async t => {
   const error = await t.throwsAsync(openkey.plans.create({ id: randomUUID(), limit: 3 }))
   t.is(error.message, 'The argument `period` must be a string.')
   t.is(error.name, 'TypeError')
 })
 
-test('.create # `metadata` must be a flat object', async t => {
+test('.create # error if `metadata` is not a flat object', async t => {
   {
     const error = await t.throwsAsync(
       openkey.plans.create({
@@ -264,7 +264,7 @@ test('.update # add metadata', async t => {
   }
 })
 
-test('.update # metadata must be a flat object', async t => {
+test('.update # error is metadata is not a flat object', async t => {
   const { id } = await openkey.plans.create({
     id: randomUUID(),
     limit: 1,

@@ -17,7 +17,7 @@ testCleanup({
   keys: () => Promise.all([redis.keys(openkey.keys.prefixKey('*'))])
 })
 
-test('.create # `metadata` must be a flat object', async t => {
+test('.create # error if `metadata` is not a flat object', async t => {
   const error = await t.throwsAsync(openkey.keys.create({ metadata: { tier: { type: 'new' } } }))
   t.is(error.message, "The metadata field 'tier' can't be an object.")
   t.is(error.name, 'TypeError')
@@ -131,7 +131,7 @@ test('.update # add metadata', async t => {
   }
 })
 
-test('.update # metadata must be a flat object', async t => {
+test('.update # error is metadata is not a flat object', async t => {
   const { value } = await openkey.keys.create()
   const error = await t.throwsAsync(openkey.keys.update(value, { metadata: { email: { cc: 'hello@microlink.io' } } }))
   t.is(error.message, "The metadata field 'email' can't be an object.")
