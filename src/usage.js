@@ -29,7 +29,6 @@ module.exports = ({ plans, keys, redis, stats, prefix, serialize, deserialize })
 
     let usage = deserialize(await redis.get(prefixKey(keyValue)))
 
-    // TODO: move into lua script
     if (usage === null) {
       usage = {
         count: quantity,
@@ -45,7 +44,9 @@ module.exports = ({ plans, keys, redis, stats, prefix, serialize, deserialize })
     }
 
     const pending =
-      quantity > 0 && Promise.all([redis.set(prefixKey(keyValue), serialize(usage)), stats.increment(keyValue)])
+      quantity > 0
+        ? Promise.all([redis.set(prefixKey(keyValue), serialize(usage)), stats.increment(keyValue, quantity)])
+        : Promise.resolve([])
 
     return {
       limit: plan.limit,

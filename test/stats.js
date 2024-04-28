@@ -24,7 +24,7 @@ testCleanup({
     ])
 })
 
-test('.stats', async t => {
+test.serial('.increment # by one', async t => {
   const plan = await openkey.plans.create({
     id: randomUUID(),
     limit: 3,
@@ -50,6 +50,34 @@ test('.stats', async t => {
       await data.pending
     })
   )
+
+  Date.setNow()
+
+  t.deepEqual(await openkey.stats(key.value), [
+    { date: openkey.stats.formatYYYMMDDDate(), count: 1 },
+    { date: openkey.stats.formatYYYMMDDDate(addDays(Date.now(), 1)), count: 10 },
+    { date: openkey.stats.formatYYYMMDDDate(addDays(Date.now(), 2)), count: 5 }
+  ])
+})
+
+test.serial('.increment # by more than one', async t => {
+  const plan = await openkey.plans.create({
+    id: randomUUID(),
+    limit: 3,
+    period: '100ms'
+  })
+
+  const key = await openkey.keys.create({ plan: plan.id })
+  const data = await openkey.usage.increment(key.value)
+  await data.pending
+
+  Date.setNow(addDays(Date.now(), 1))
+  await openkey.usage.increment(key.value, 10)
+  await data.pending
+
+  Date.setNow(addDays(Date.now(), 1))
+  await openkey.usage.increment(key.value, 5)
+  await data.pending
 
   Date.setNow()
 
