@@ -35,12 +35,13 @@ module.exports = ({ serialize, deserialize, redis, keys, prefix } = {}) => {
     const metadata = assertMetadata(opts.metadata)
     if (metadata) plan.metadata = metadata
     plan.createdAt = plan.updatedAt = Date.now()
-    await redis.set(prefixKey(opts.id), serialize(plan), 'NX')
+    const isCreated = (await redis.set(prefixKey(opts.id), serialize(plan), 'NX')) === 'OK'
+    if (!isCreated) throw new TypeError(`The plan \`${opts.id}\` already exists.`)
     return Object.assign({ id: opts.id }, plan)
   }
 
   /**
-   * Retrieve a plan by id
+   * Retrieve a plan by id.
    *
    * @param {string} id - The id of the plan.
    * @param {Object} [options] - The options for retrieving a plan.
@@ -128,7 +129,7 @@ module.exports = ({ serialize, deserialize, redis, keys, prefix } = {}) => {
     return result
   }
 
-  const prefixKey = key => `${prefix}plan_${key}`
+  const prefixKey = key => `${prefix}plan:${key}`
 
   return { create, del, retrieve, update, list, prefixKey }
 }
