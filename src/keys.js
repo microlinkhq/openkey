@@ -88,7 +88,7 @@ module.exports = ({ serialize, deserialize, plans, redis, prefix } = {}) => {
     return Promise.all(keyValues.map(keyValues => retrieve(keyValues)))
   }
 
-  const prefixKey = key => `${prefix}key_${key}`
+  const prefixKey = key => `${prefix}key:${key}`
 
   return { create, retrieve, del, update, list, prefixKey }
 }

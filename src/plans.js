@@ -129,7 +129,7 @@ module.exports = ({ serialize, deserialize, redis, keys, prefix } = {}) => {
     return result
   }
 
-  const prefixKey = key => `${prefix}plan_${key}`
+  const prefixKey = key => `${prefix}plan:${key}`
 
   return { create, del, retrieve, update, list, prefixKey }
 }
