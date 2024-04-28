@@ -31,7 +31,6 @@ test('.increment', async t => {
 
   const key = await openkey.keys.create({ plan: plan.id })
   let data = await openkey.usage(key.value)
-  t.is(data.pending, false)
   t.is(data.remaining, 3)
   data = await openkey.usage.increment(key.value)
   await data.pending

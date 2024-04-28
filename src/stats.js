@@ -1,5 +1,12 @@
 'use strict'
 
+const { promisify } = require('util')
+const stream = require('stream')
+
+const { Transform } = stream
+
+const pipeline = promisify(stream.pipeline)
+
 const formatYYYMMDDDate = (now = new Date()) => {
   const year = now.getFullYear()
   const month = String(now.getMonth() + 1).padStart(2, '0')
@@ -7,12 +14,31 @@ const formatYYYMMDDDate = (now = new Date()) => {
   return `${year}-${month}-${day}`
 }
 
+/**
+ * 90 days in milliseconds
+ */
+const TTL = 90 * 24 * 60 * 60 * 1000
+
+/**
+ * Lua script to increment a key and set an expiration time if it doesn't have one.
+ * This script is necessary to perform the operation atomically.
+ */
+const LUA_INCREMENT_AND_EXPIRE = `
+local key = KEYS[1]
+local ttl = ARGV[1]
+local quantity = ARGV[2]
+local current = redis.call('incrby', key, quantity)
+if tonumber(redis.call('ttl', key)) == -1 then
+  redis.call('expire', key, ttl)
+end
+return current
+`
+
 module.exports = ({ redis, prefix }) => {
   const prefixKey = key => `${prefix}stats:${key}`
 
-  const increment = async keyValue => {
-    redis.incr(`${prefixKey(keyValue)}:${formatYYYMMDDDate()}`)
-  }
+  const increment = (keyValue, quantity = 1) =>
+    redis.eval(LUA_INCREMENT_AND_EXPIRE, 1, `${prefixKey(keyValue)}:${formatYYYMMDDDate()}`, TTL, quantity)
 
   /**
    * Get stats for a given key.
@@ -30,15 +56,24 @@ module.exports = ({ redis, prefix }) => {
    * // ]
    */
   const stats = async keyValue => {
-    const keys = await redis.keys(prefixKey(`${keyValue}*`))
     const stats = []
+    const stream = redis.scanStream({ match: `${prefixKey(keyValue)}*` })
+    const dataHandler = new Transform({
+      objectMode: true,
+      transform: async (keys, _, next) => {
+        if (keys.length) {
+          const values = await redis.mget.apply(redis, keys)
+          const statsPart = keys.map((key, i) => ({
+            date: key.replace(`${prefixKey(keyValue)}:`, ''),
+            count: Number(values[i])
+          }))
+          stats.push.apply(stats, statsPart)
+        }
+        next()
+      }
+    })
 
-    for (const key of keys) {
-      const date = key.replace(`${prefixKey(keyValue)}:`, '')
-      const count = Number(await redis.get(key))
-      stats.push({ date, count })
-    }
-
+    await pipeline(stream, dataHandler)
     return stats.sort((a, b) => a.date.localeCompare(b.date))
   }
 
