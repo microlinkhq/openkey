@@ -18,12 +18,15 @@ module.exports = ({ serialize, deserialize, redis, keys, prefix } = {}) => {
    * @returns {Object} The plan object.
    */
   const create = async (opts = {}) => {
-    assert(typeof opts.id === 'string' && opts.id.length > 0, 'PLAN_ID_REQUIRED')
-    assert(!/\s/.test(opts.id), 'PLAN_INVALID_ID')
+    assert(typeof opts.id === 'string' && opts.id.length > 0, 'ERR_PLAN_ID_REQUIRED')
+    assert(!/\s/.test(opts.id), 'ERR_PLAN_INVALID_ID')
     const plan = Object.assign(
       {
-        limit: assert(typeof opts.limit === 'number' && opts.limit > 0 && opts.limit, 'PLAN_INVALID_LIMIT'),
-        period: assert(typeof opts.period === 'string' && opts.period.length > 0 && opts.period, 'PLAN_INVALID_PERIOD')
+        limit: assert(typeof opts.limit === 'number' && opts.limit > 0 && opts.limit, 'ERR_PLAN_INVALID_LIMIT'),
+        period: assert(
+          typeof opts.period === 'string' && opts.period.length > 0 && opts.period,
+          'ERR_PLAN_INVALID_PERIOD'
+        )
       },
       pick(opts, ['rate', 'burst'])
     )
@@ -31,7 +34,7 @@ module.exports = ({ serialize, deserialize, redis, keys, prefix } = {}) => {
     if (metadata) plan.metadata = metadata
     plan.createdAt = plan.updatedAt = Date.now()
     const isCreated = (await redis.set(prefixKey(opts.id), serialize(plan), 'NX')) === 'OK'
-    assert(isCreated, 'PLAN_ALREADY_EXIST', () => [opts.id])
+    assert(isCreated, 'ERR_PLAN_ALREADY_EXIST', () => [opts.id])
     return Object.assign({ id: opts.id }, plan)
   }
 
@@ -47,7 +50,7 @@ module.exports = ({ serialize, deserialize, redis, keys, prefix } = {}) => {
    */
   const retrieve = async (id, { throwError = false } = {}) => {
     const plan = await redis.get(prefixKey(id))
-    if (throwError) assert(plan !== null, 'PLAN_NOT_EXIST', () => [id])
+    if (throwError) assert(plan !== null, 'ERR_PLAN_NOT_EXIST', () => [id])
     else if (plan === null) return null
     return Object.assign({ id }, deserialize(plan))
   }
@@ -63,9 +66,9 @@ module.exports = ({ serialize, deserialize, redis, keys, prefix } = {}) => {
   const del = async id => {
     const allKeys = await keys().list()
     const key = allKeys.find(key => key.plan === id)
-    assert(key === undefined, 'KEY_IS_ASSOCIATED', () => [id, key.value])
+    assert(key === undefined, 'ERR_KEY_IS_ASSOCIATED', () => [id, key.value])
     const isDeleted = (await redis.del(prefixKey(id))) === 1
-    assert(isDeleted, 'PLAN_NOT_EXIST', () => [id])
+    assert(isDeleted, 'ERR_PLAN_NOT_EXIST', () => [id])
     return isDeleted
   }
 
@@ -95,13 +98,13 @@ module.exports = ({ serialize, deserialize, redis, keys, prefix } = {}) => {
     )
 
     if (opts.limit) {
-      plan.limit = assert(typeof opts.limit === 'number' && opts.limit > 0 && opts.limit, 'PLAN_INVALID_LIMIT')
+      plan.limit = assert(typeof opts.limit === 'number' && opts.limit > 0 && opts.limit, 'ERR_PLAN_INVALID_LIMIT')
     }
 
     if (opts.period) {
       plan.period = assert(
         typeof opts.period === 'string' && opts.period.length > 0 && opts.period,
-        'PLAN_INVALID_PERIOD'
+        'ERR_PLAN_INVALID_PERIOD'
       )
     }
 

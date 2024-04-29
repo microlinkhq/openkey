@@ -11,16 +11,16 @@ class OpenKeyError extends Error {
 }
 
 const errors = [
-  ['KEY_NOT_EXIST', key => `The key \`${key}\` does not exist.`],
-  ['KEY_IS_ASSOCIATED', (id, value) => `The plan \`${id}\` is associated with the key \`${value}\`.`],
-  ['PLAN_NOT_EXIST', plan => `The plan \`${plan}\` does not exist.`],
-  ['PLAN_ID_REQUIRED', () => 'The argument `id` must be a string.'],
-  ['PLAN_INVALID_ID', () => 'The argument `id` cannot contain whitespace.'],
-  ['PLAN_INVALID_LIMIT', () => 'The argument `limit` must be a positive number.'],
-  ['PLAN_INVALID_PERIOD', () => 'The argument `period` must be a string.'],
-  ['PLAN_ALREADY_EXIST', plan => `The plan \`${plan}\` already exists.`],
-  ['METADATA_NOT_FLAT_OBJECT', () => 'The metadata must be a flat object.'],
-  ['METADATA_INVALID', key => `The metadata field '${key}' can't be an object.`]
+  ['ERR_KEY_NOT_EXIST', key => `The key \`${key}\` does not exist.`],
+  ['ERR_KEY_IS_ASSOCIATED', (id, value) => `The plan \`${id}\` is associated with the key \`${value}\`.`],
+  ['ERR_PLAN_NOT_EXIST', plan => `The plan \`${plan}\` does not exist.`],
+  ['ERR_PLAN_ID_REQUIRED', () => 'The argument `id` must be a string.'],
+  ['ERR_PLAN_INVALID_ID', () => 'The argument `id` cannot contain whitespace.'],
+  ['ERR_PLAN_INVALID_LIMIT', () => 'The argument `limit` must be a positive number.'],
+  ['ERR_PLAN_INVALID_PERIOD', () => 'The argument `period` must be a string.'],
+  ['ERR_PLAN_ALREADY_EXIST', plan => `The plan \`${plan}\` already exists.`],
+  ['ERR_METADATA_NOT_FLAT_OBJECT', () => 'The metadata must be a flat object.'],
+  ['ERR_METADATA_INVALID', key => `The metadata field '${key}' can't be an object.`]
 ].reduce((acc, [code, message]) => {
   acc[code] = args => new OpenKeyError({ code, message: message.apply(null, args()) })
   return acc
@@ -37,9 +37,9 @@ const assert = (condition, code, args = () => []) => {
 
 const assertMetadata = metadata => {
   if (metadata) {
-    assert(isPlainObject(metadata), 'METADATA_NOT_FLAT_OBJECT')
+    assert(isPlainObject(metadata), 'ERR_METADATA_NOT_FLAT_OBJECT')
     Object.keys(metadata).forEach(key => {
-      assert(!isPlainObject(metadata[key]), 'METADATA_INVALID', () => [key])
+      assert(!isPlainObject(metadata[key]), 'ERR_METADATA_INVALID', () => [key])
       if (metadata[key] === undefined) delete metadata[key]
     })
     return Object.keys(metadata).length ? metadata : undefined
