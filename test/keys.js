@@ -21,7 +21,7 @@ test('.create # error if `metadata` is not a flat object', async t => {
   const error = await t.throwsAsync(openkey.keys.create({ metadata: { tier: { type: 'new' } } }))
   t.is(error.message, "The metadata field 'tier' can't be an object.")
   t.is(error.name, 'OpenKeyError')
-  t.is(error.code, 'METADATA_INVALID')
+  t.is(error.code, 'ERR_METADATA_INVALID')
 })
 
 test('.create # `metadata` as undefined is omitted', async t => {
@@ -33,7 +33,7 @@ test('.create # error if plan does not exist', async t => {
   const error = await t.throwsAsync(openkey.keys.create({ plan: '123' }))
   t.is(error.message, 'The plan `123` does not exist.')
   t.is(error.name, 'OpenKeyError')
-  t.is(error.code, 'PLAN_NOT_EXIST')
+  t.is(error.code, 'ERR_PLAN_NOT_EXIST')
 })
 
 test('.create', async t => {
@@ -97,7 +97,7 @@ test('.update # error if key does not exist', async t => {
   const error = await t.throwsAsync(openkey.keys.update('value'))
   t.is(error.message, 'The key `value` does not exist.')
   t.is(error.name, 'OpenKeyError')
-  t.is(error.code, 'KEY_NOT_EXIST')
+  t.is(error.code, 'ERR_KEY_NOT_EXIST')
 })
 
 test('.update # error if plan does not exist', async t => {
@@ -105,7 +105,7 @@ test('.update # error if plan does not exist', async t => {
   const error = await t.throwsAsync(openkey.keys.update(value, { plan: 'id' }))
   t.is(error.message, 'The plan `id` does not exist.')
   t.is(error.name, 'OpenKeyError')
-  t.is(error.code, 'PLAN_NOT_EXIST')
+  t.is(error.code, 'ERR_PLAN_NOT_EXIST')
 })
 
 test('.update # add a plan', async t => {
@@ -140,7 +140,7 @@ test('.update # error is metadata is not a flat object', async t => {
   const error = await t.throwsAsync(openkey.keys.update(value, { metadata: { email: { cc: 'hello@microlink.io' } } }))
   t.is(error.message, "The metadata field 'email' can't be an object.")
   t.is(error.name, 'OpenKeyError')
-  t.is(error.code, 'METADATA_INVALID')
+  t.is(error.code, 'ERR_METADATA_INVALID')
 })
 
 test('.update # metadata as undefined is omitted', async t => {
@@ -198,5 +198,5 @@ test('.del # error if key does not exist', async t => {
 
   t.is(error.message, 'The key `key_id` does not exist.')
   t.is(error.name, 'OpenKeyError')
-  t.is(error.code, 'KEY_NOT_EXIST')
+  t.is(error.code, 'ERR_KEY_NOT_EXIST')
 })

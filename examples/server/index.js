@@ -2,17 +2,22 @@
 
 const { styleText } = require('node:util')
 const { json } = require('http-body')
-const send = require('send-http')
+
 const Redis = require('ioredis')
 const http = require('http')
 
 const redis = new Redis()
 const openkey = require('../..')({ redis })
 
-const server = http.createServer(async (req, res) => {
-  try {
-    console.log(`~> ${req.method} ${req.url} `)
+const createSend = req => (res, statusCode, body) => {
+  console.log(`~> ${req.method} ${req.url} (${statusCode})`)
+  return require('send-http')(res, statusCode, body)
+}
 
+const server = http.createServer(async (req, res) => {
+  const send = createSend(req)
+
+  try {
     if (req.url === '/keys/create') {
       const options = await json(req)
       const result = await openkey.keys.create(options)
@@ -49,9 +54,11 @@ const server = http.createServer(async (req, res) => {
 
     return send(res, 400)
   } catch (error) {
+    if (error.name === 'OpenKeyError') {
+      return send(res, 400, { code: error.code, message: error.message })
+    }
     console.log('   ' + styleText('red', `ERROR: ${error.message}`))
-    res.statusCode = 500
-    res.end()
+    return send(res, 500)
   }
 })
 
