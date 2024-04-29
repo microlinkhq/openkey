@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "dev": "watchexec --on-busy-update=restart --exts js,yml --clear=clear 'node index.js'"
+  }
+}

@@ -20,26 +20,11 @@ const pick = (obj, keys) => {
   return result
 }
 
-/**
- * Assert a condition, or throw an error if the condition is falsy.
- * @param {*} value - The value to assert.
- * @param {string} message - The error message.
- */
-const assert = (value, message) =>
-  value ||
-  (() => {
-    throw new TypeError(message())
-  })()
-
-const assertMetadata = metadata => {
-  if (metadata) {
-    assert(isPlainObject(metadata), () => 'The metadata must be a flat object.')
-    Object.keys(metadata).forEach(key => {
-      assert(!isPlainObject(metadata[key]), () => `The metadata field '${key}' can't be an object.`)
-      if (metadata[key] === undefined) delete metadata[key]
-    })
-    return Object.keys(metadata).length ? metadata : undefined
-  }
+const formatYYYMMDDDate = (now = new Date()) => {
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
 }
 
 const isPlainObject = value => {
@@ -52,8 +37,8 @@ const isPlainObject = value => {
 }
 
 module.exports = {
-  assert,
-  assertMetadata,
+  formatYYYMMDDDate,
+  isPlainObject,
   pick,
   uid
 }
