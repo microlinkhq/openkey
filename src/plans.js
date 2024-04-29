@@ -31,7 +31,7 @@ module.exports = ({ serialize, deserialize, redis, keys, prefix } = {}) => {
     if (metadata) plan.metadata = metadata
     plan.createdAt = plan.updatedAt = Date.now()
     const isCreated = (await redis.set(prefixKey(opts.id), serialize(plan), 'NX')) === 'OK'
-    assert(isCreated, 'PLAN_ALREADY_EXIST', opts.id)
+    assert(isCreated, 'PLAN_ALREADY_EXIST', () => [opts.id])
     return Object.assign({ id: opts.id }, plan)
   }
 
@@ -47,7 +47,7 @@ module.exports = ({ serialize, deserialize, redis, keys, prefix } = {}) => {
    */
   const retrieve = async (id, { throwError = false } = {}) => {
     const plan = await redis.get(prefixKey(id))
-    if (throwError) assert(plan !== null, 'PLAN_NOT_EXIST', id)
+    if (throwError) assert(plan !== null, 'PLAN_NOT_EXIST', () => [id])
     else if (plan === null) return null
     return Object.assign({ id }, deserialize(plan))
   }
@@ -63,10 +63,9 @@ module.exports = ({ serialize, deserialize, redis, keys, prefix } = {}) => {
   const del = async id => {
     const allKeys = await keys().list()
     const key = allKeys.find(key => key.plan === id)
-    // TODO: try to improve this
-    assert(key === undefined, 'KEY_IS_ASSOCIATED', id, key?.value)
+    assert(key === undefined, 'KEY_IS_ASSOCIATED', () => [id, key.value])
     const isDeleted = (await redis.del(prefixKey(id))) === 1
-    assert(isDeleted, 'PLAN_NOT_EXIST', id)
+    assert(isDeleted, 'PLAN_NOT_EXIST', () => [id])
     return isDeleted
   }
 

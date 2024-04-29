@@ -1,13 +1,6 @@
 'use strict'
 
-const isPlainObject = value => {
-  if (!value || typeof value !== 'object' || value.toString() !== '[object Object]') {
-    return false
-  }
-
-  const prototype = Object.getPrototypeOf(value)
-  return prototype === null || prototype === Object.prototype
-}
+const { isPlainObject } = require('./util')
 
 class OpenKeyError extends Error {
   constructor (props) {
@@ -29,15 +22,15 @@ const errors = [
   ['METADATA_NOT_FLAT_OBJECT', () => 'The metadata must be a flat object.'],
   ['METADATA_INVALID', key => `The metadata field '${key}' can't be an object.`]
 ].reduce((acc, [code, message]) => {
-  acc[code] = (...input) => new OpenKeyError({ code, message: message(...input) })
+  acc[code] = args => new OpenKeyError({ code, message: message.apply(null, args()) })
   return acc
 }, {})
 
-const assert = (condition, code, ...opts) => {
+const assert = (condition, code, args = () => []) => {
   return (
     condition ||
     (() => {
-      throw errors[code].apply(null, opts)
+      throw errors[code](args)
     })()
   )
 }
@@ -46,7 +39,7 @@ const assertMetadata = metadata => {
   if (metadata) {
     assert(isPlainObject(metadata), 'METADATA_NOT_FLAT_OBJECT')
     Object.keys(metadata).forEach(key => {
-      assert(!isPlainObject(metadata[key]), 'METADATA_INVALID', key)
+      assert(!isPlainObject(metadata[key]), 'METADATA_INVALID', () => [key])
       if (metadata[key] === undefined) delete metadata[key]
     })
     return Object.keys(metadata).length ? metadata : undefined

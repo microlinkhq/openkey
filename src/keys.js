@@ -41,7 +41,7 @@ module.exports = ({ serialize, deserialize, plans, redis, prefix } = {}) => {
    */
   const retrieve = async (value, { throwError = false } = {}) => {
     const key = await redis.get(prefixKey(value))
-    if (throwError) assert(key !== null, 'KEY_NOT_EXIST', value)
+    if (throwError) assert(key !== null, 'KEY_NOT_EXIST', () => [value])
     else if (key === null) return null
     return Object.assign({ value }, deserialize(key))
   }
@@ -55,7 +55,7 @@ module.exports = ({ serialize, deserialize, plans, redis, prefix } = {}) => {
    */
   const del = async value => {
     const isDeleted = (await redis.del(prefixKey(value))) === 1
-    assert(isDeleted, 'KEY_NOT_EXIST', value)
+    assert(isDeleted, 'KEY_NOT_EXIST', () => [value])
     return isDeleted
   }
 
