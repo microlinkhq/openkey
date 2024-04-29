@@ -26,7 +26,7 @@ test('.get # error if key does not exist', async t => {
   const error = await t.throwsAsync(openkey.usage('value'))
   t.is(error.message, 'The key `value` does not exist.')
   t.is(error.name, 'OpenKeyError')
-  t.is(error.code, 'KEY_NOT_EXIST')
+  t.is(error.code, 'ERR_KEY_NOT_EXIST')
 })
 
 test('.get # error if plan does not exist', async t => {
@@ -34,7 +34,7 @@ test('.get # error if plan does not exist', async t => {
   const error = await t.throwsAsync(openkey.usage(key.value))
   t.is(error.message, 'The plan `undefined` does not exist.')
   t.is(error.name, 'OpenKeyError')
-  t.is(error.code, 'PLAN_NOT_EXIST')
+  t.is(error.code, 'ERR_PLAN_NOT_EXIST')
 })
 
 test('.increment', async t => {
