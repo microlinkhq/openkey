@@ -21,32 +21,38 @@ test('.create # error is `id` is not provided', async t => {
   {
     const error = await t.throwsAsync(openkey.plans.create())
     t.is(error.message, 'The argument `id` must be a string.')
-    t.is(error.name, 'TypeError')
+    t.is(error.name, 'OpenKeyError')
+    t.is(error.code, 'PLAN_ID_REQUIRED')
   }
   {
     const error = await t.throwsAsync(openkey.plans.create({ id: null }))
     t.is(error.message, 'The argument `id` must be a string.')
-    t.is(error.name, 'TypeError')
+    t.is(error.name, 'OpenKeyError')
+    t.is(error.code, 'PLAN_ID_REQUIRED')
   }
   {
     const error = await t.throwsAsync(openkey.plans.create({ id: undefined }))
     t.is(error.message, 'The argument `id` must be a string.')
-    t.is(error.name, 'TypeError')
+    t.is(error.name, 'OpenKeyError')
+    t.is(error.code, 'PLAN_ID_REQUIRED')
   }
   {
     const error = await t.throwsAsync(openkey.plans.create({ id: 0 }))
     t.is(error.message, 'The argument `id` must be a string.')
-    t.is(error.name, 'TypeError')
+    t.is(error.name, 'OpenKeyError')
+    t.is(error.code, 'PLAN_ID_REQUIRED')
   }
   {
     const error = await t.throwsAsync(openkey.plans.create({ id: NaN }))
     t.is(error.message, 'The argument `id` must be a string.')
-    t.is(error.name, 'TypeError')
+    t.is(error.name, 'OpenKeyError')
+    t.is(error.code, 'PLAN_ID_REQUIRED')
   }
   {
     const error = await t.throwsAsync(openkey.plans.create({ id: false }))
     t.is(error.message, 'The argument `id` must be a string.')
-    t.is(error.name, 'TypeError')
+    t.is(error.name, 'OpenKeyError')
+    t.is(error.code, 'PLAN_ID_REQUIRED')
   }
 })
 
@@ -57,25 +63,29 @@ test('.create # error if `id` already exist', async t => {
   t.is(typeof plan, 'object')
   const error = await t.throwsAsync(openkey.plans.create(props))
   t.is(error.message, `The plan \`${id}\` already exists.`)
-  t.is(error.name, 'TypeError')
+  t.is(error.name, 'OpenKeyError')
+  t.is(error.code, 'PLAN_ALREADY_EXIST')
 })
 
 test('.create # error if `id` contains whitespaces', async t => {
   const error = await t.throwsAsync(openkey.plans.create({ id: 'free tier' }))
   t.is(error.message, 'The argument `id` cannot contain whitespace.')
-  t.is(error.name, 'TypeError')
+  t.is(error.name, 'OpenKeyError')
+  t.is(error.code, 'PLAN_INVALID_ID')
 })
 
 test('.create # error if `limit` is not provided', async t => {
   const error = await t.throwsAsync(openkey.plans.create({ id: randomUUID() }))
   t.is(error.message, 'The argument `limit` must be a positive number.')
-  t.is(error.name, 'TypeError')
+  t.is(error.name, 'OpenKeyError')
+  t.is(error.code, 'PLAN_INVALID_LIMIT')
 })
 
 test('.create # error if `period` is not provided', async t => {
   const error = await t.throwsAsync(openkey.plans.create({ id: randomUUID(), limit: 3 }))
   t.is(error.message, 'The argument `period` must be a string.')
-  t.is(error.name, 'TypeError')
+  t.is(error.name, 'OpenKeyError')
+  t.is(error.code, 'PLAN_INVALID_PERIOD')
 })
 
 test('.create # error if `metadata` is not a flat object', async t => {
@@ -89,7 +99,8 @@ test('.create # error if `metadata` is not a flat object', async t => {
       })
     )
     t.is(error.message, "The metadata field 'tier' can't be an object.")
-    t.is(error.name, 'TypeError')
+    t.is(error.name, 'OpenKeyError')
+    t.is(error.code, 'METADATA_INVALID')
   }
   {
     const error = await t.throwsAsync(
@@ -101,7 +112,8 @@ test('.create # error if `metadata` is not a flat object', async t => {
       })
     )
     t.is(error.message, 'The metadata must be a flat object.')
-    t.is(error.name, 'TypeError')
+    t.is(error.name, 'OpenKeyError')
+    t.is(error.code, 'METADATA_NOT_FLAT_OBJECT')
   }
 })
 
@@ -273,7 +285,8 @@ test('.update # error is metadata is not a flat object', async t => {
 
   const error = await t.throwsAsync(openkey.plans.update(id, { metadata: { tier: { type: 'new' } } }))
   t.is(error.message, "The metadata field 'tier' can't be an object.")
-  t.is(error.name, 'TypeError')
+  t.is(error.name, 'OpenKeyError')
+  t.is(error.code, 'METADATA_INVALID')
 })
 
 test('.update # metadata as undefined is omitted', async t => {
@@ -326,7 +339,8 @@ test('.update # prevent to modify the plan id', async t => {
 test('.update # error if plan does not exist', async t => {
   const error = await t.throwsAsync(openkey.plans.update('plan_id', { foo: 'bar' }))
   t.is(error.message, 'The plan `plan_id` does not exist.')
-  t.is(error.name, 'TypeError')
+  t.is(error.name, 'OpenKeyError')
+  t.is(error.code, 'PLAN_NOT_EXIST')
 })
 
 test.serial('.list', async t => {
@@ -367,7 +381,8 @@ test('.del', async t => {
 test('.del # error if plan does not exist', async t => {
   const error = await t.throwsAsync(openkey.plans.del('id'))
   t.is(error.message, 'The plan `id` does not exist.')
-  t.is(error.name, 'TypeError')
+  t.is(error.name, 'OpenKeyError')
+  t.is(error.code, 'PLAN_NOT_EXIST')
 })
 
 test.serial('.del # error if a key is associated with the plan', async t => {
@@ -381,5 +396,6 @@ test.serial('.del # error if a key is associated with the plan', async t => {
   const error = await t.throwsAsync(openkey.plans.del(plan.id))
 
   t.is(error.message, `The plan \`${plan.id}\` is associated with the key \`${key.value}\`.`)
-  t.is(error.name, 'TypeError')
+  t.is(error.name, 'OpenKeyError')
+  t.is(error.code, 'KEY_IS_ASSOCIATED')
 })

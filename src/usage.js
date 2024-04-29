@@ -9,7 +9,9 @@ module.exports = ({ plans, keys, redis, stats, prefix, serialize, deserialize })
    * Increment the usage for a given key.
    *
    * @param {string} keyValue
-   * @param {number} [quantity=1]
+   * @param {Object} options - The options for creating a plan.
+   * @param {number} [options.quantity=1] - The quantity to increment.
+   * @param {boolean} [options.throwError=true] - Throw an error if the key does not exist.
    *
    * @returns {Promise<{limit: number, remaining: number, reset: number, pending: Promise<void>}>}
    *
@@ -23,9 +25,9 @@ module.exports = ({ plans, keys, redis, stats, prefix, serialize, deserialize })
    * // }
    *
    */
-  const increment = async (keyValue, quantity = 1) => {
-    const key = await keys.retrieve(keyValue)
-    const plan = await plans.retrieve(key.plan)
+  const increment = async (keyValue, { quantity = 1, throwError = true } = {}) => {
+    const key = await keys.retrieve(keyValue, { throwError })
+    const plan = await plans.retrieve(key.plan, { throwError })
 
     let usage = deserialize(await redis.get(prefixKey(keyValue)))
 
@@ -73,7 +75,7 @@ module.exports = ({ plans, keys, redis, stats, prefix, serialize, deserialize })
    * // }
    *
    */
-  const get = async keyValue => increment(keyValue, 0)
+  const get = async keyValue => increment(keyValue, { quantity: 0 })
   get.increment = increment
   get.prefixKey = prefixKey
 

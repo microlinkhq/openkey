@@ -1,6 +1,7 @@
 'use strict'
 
-const { pick, uid, assert, assertMetadata } = require('./util')
+const { pick, uid } = require('./util')
+const { assert, assertMetadata } = require('./error')
 
 module.exports = ({ serialize, deserialize, plans, redis, prefix } = {}) => {
   /**
@@ -40,7 +41,7 @@ module.exports = ({ serialize, deserialize, plans, redis, prefix } = {}) => {
    */
   const retrieve = async (value, { throwError = false } = {}) => {
     const key = await redis.get(prefixKey(value))
-    if (throwError) assert(key !== null, () => `The key \`${value}\` does not exist.`)
+    if (throwError) assert(key !== null, 'KEY_NOT_EXIST', value)
     else if (key === null) return null
     return Object.assign({ value }, deserialize(key))
   }
@@ -54,7 +55,7 @@ module.exports = ({ serialize, deserialize, plans, redis, prefix } = {}) => {
    */
   const del = async value => {
     const isDeleted = (await redis.del(prefixKey(value))) === 1
-    assert(isDeleted, () => `The key \`${value}\` does not exist.`)
+    assert(isDeleted, 'KEY_NOT_EXIST', value)
     return isDeleted
   }
 

@@ -72,11 +72,11 @@ test.serial('.increment # by more than one', async t => {
   await data.pending
 
   Date.setNow(addDays(Date.now(), 1))
-  await openkey.usage.increment(key.value, 10)
+  await openkey.usage.increment(key.value, { quantity: 10 })
   await data.pending
 
   Date.setNow(addDays(Date.now(), 1))
-  await openkey.usage.increment(key.value, 5)
+  await openkey.usage.increment(key.value, { quantity: 5 })
   await data.pending
 
   Date.setNow()
