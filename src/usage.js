@@ -29,11 +29,11 @@ module.exports = ({ plans, keys, redis, stats, prefix, serialize, deserialize })
     const key = await keys.retrieve(keyValue, { throwError })
     const plan = await plans.retrieve(key.plan, { throwError })
 
-    let usage = deserialize(await redis.get(prefixKey(keyValue)))
+    let usage = await deserialize(await redis.get(prefixKey(keyValue)))
 
     if (usage === null) {
       usage = {
-        count: quantity,
+        count: Math.min(quantity, plan.limit),
         reset: Date.now() + ms(plan.period)
       }
     } else if (Date.now() > usage.reset) {
@@ -41,13 +41,13 @@ module.exports = ({ plans, keys, redis, stats, prefix, serialize, deserialize })
       usage.reset = Date.now() + ms(plan.period)
     } else {
       if (usage.count < plan.limit) {
-        usage.count = usage.count + quantity
+        usage.count = Math.min(usage.count + quantity, plan.limit)
       }
     }
 
     const pending =
       quantity > 0
-        ? Promise.all([redis.set(prefixKey(keyValue), serialize(usage)), stats.increment(keyValue, quantity)])
+        ? Promise.all([redis.set(prefixKey(keyValue), await serialize(usage)), stats.increment(keyValue, quantity)])
         : Promise.resolve([])
 
     return {

@@ -37,6 +37,21 @@ test('.get # error if plan does not exist', async t => {
   t.is(error.code, 'ERR_PLAN_NOT_EXIST')
 })
 
+test('.get', async t => {
+  const plan = await openkey.plans.create({
+    id: randomUUID(),
+    limit: 3,
+    period: '100ms'
+  })
+  const key = await openkey.keys.create({ plan: plan.id })
+  const usage = await openkey.usage(key.value)
+
+  t.is(usage.limit, 3)
+  t.is(usage.remaining, 3)
+  t.true(usage.reset > Date.now())
+  t.deepEqual(await Promise.resolve(usage.pending), [])
+})
+
 test('.increment', async t => {
   const plan = await openkey.plans.create({
     id: randomUUID(),
@@ -65,4 +80,33 @@ test('.increment', async t => {
   await setTimeout(100)
   data = await openkey.usage(key.value)
   t.is(data.remaining, 3)
+})
+
+test(".increment # don't increment more than the limit", async t => {
+  {
+    const plan = await openkey.plans.create({
+      id: randomUUID(),
+      limit: 3,
+      period: '100ms'
+    })
+    const key = await openkey.keys.create({ plan: plan.id })
+    const usage = await openkey.usage.increment(key.value, { quantity: 10 })
+
+    t.is(usage.limit, 3)
+    t.is(usage.remaining, 0)
+  }
+
+  {
+    const plan = await openkey.plans.create({
+      id: randomUUID(),
+      limit: 3,
+      period: '100ms'
+    })
+    const key = await openkey.keys.create({ plan: plan.id })
+    await openkey.usage.increment(key.value)
+    const usage = await openkey.usage.increment(key.value, { quantity: 10 })
+
+    t.is(usage.limit, 3)
+    t.is(usage.remaining, 0)
+  }
 })
