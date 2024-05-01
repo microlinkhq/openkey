@@ -25,7 +25,7 @@ module.exports = ({ serialize, deserialize, plans, redis, prefix } = {}) => {
       await plans.retrieve(opts.plan, { throwError: true })
       key.plan = opts.plan
     }
-    await redis.set(prefixKey(value), serialize(key), 'NX')
+    await redis.set(prefixKey(value), await serialize(key), 'NX')
     return Object.assign({ value }, key)
   }
 
@@ -43,7 +43,7 @@ module.exports = ({ serialize, deserialize, plans, redis, prefix } = {}) => {
     const key = await redis.get(prefixKey(value))
     if (throwError) assert(key !== null, 'ERR_KEY_NOT_EXIST', () => [value])
     else if (key === null) return null
-    return Object.assign({ value }, deserialize(key))
+    return Object.assign({ value }, await deserialize(key))
   }
 
   /**
@@ -75,7 +75,7 @@ module.exports = ({ serialize, deserialize, plans, redis, prefix } = {}) => {
     const key = Object.assign(currentKey, { updatedAt: Date.now() }, pick(opts, ['enabled', 'value', 'plan']))
     if (Object.keys(metadata).length) key.metadata = metadata
     if (key.plan) await plans.retrieve(key.plan, { throwError: true })
-    return (await redis.set(prefixKey(value), serialize(key))) && key
+    return (await redis.set(prefixKey(value), await serialize(key))) && key
   }
 
   /**
