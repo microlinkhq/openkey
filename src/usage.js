@@ -30,15 +30,16 @@ module.exports = ({ plans, keys, redis, stats, prefix, serialize, deserialize })
     const plan = await plans.retrieve(key.plan, { throwError })
 
     let usage = await deserialize(await redis.get(prefixKey(keyValue)))
+    const now = Date.now()
 
     if (usage === null) {
       usage = {
         count: Math.min(quantity, plan.limit),
-        reset: Date.now() + ms(plan.period)
+        reset: now + ms(plan.period)
       }
-    } else if (Date.now() > usage.reset) {
+    } else if (now > usage.reset) {
       usage.count = quantity
-      usage.reset = Date.now() + ms(plan.period)
+      usage.reset = now + ms(plan.period)
     } else {
       if (usage.count < plan.limit) {
         usage.count = Math.min(usage.count + quantity, plan.limit)
