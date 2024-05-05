@@ -33,7 +33,7 @@ module.exports = ({ serialize, deserialize, redis, keys, prefix } = {}) => {
     const metadata = assertMetadata(opts.metadata)
     if (metadata) plan.metadata = metadata
     plan.createdAt = plan.updatedAt = Date.now()
-    const isCreated = (await redis.set(prefixKey(opts.id), serialize(plan), 'NX')) === 'OK'
+    const isCreated = (await redis.set(prefixKey(opts.id), await serialize(plan), 'NX')) === 'OK'
     assert(isCreated, 'ERR_PLAN_ALREADY_EXIST', () => [opts.id])
     return Object.assign({ id: opts.id }, plan)
   }
@@ -52,7 +52,7 @@ module.exports = ({ serialize, deserialize, redis, keys, prefix } = {}) => {
     const plan = await redis.get(prefixKey(id))
     if (throwError) assert(plan !== null, 'ERR_PLAN_NOT_EXIST', () => [id])
     else if (plan === null) return null
-    return Object.assign({ id }, deserialize(plan))
+    return Object.assign({ id }, await deserialize(plan))
   }
 
   /**
@@ -109,7 +109,7 @@ module.exports = ({ serialize, deserialize, redis, keys, prefix } = {}) => {
     }
 
     if (Object.keys(metadata).length) plan.metadata = metadata
-    return (await redis.set(prefixKey(id), serialize(plan))) && plan
+    return (await redis.set(prefixKey(id), await serialize(plan))) && plan
   }
 
   /**

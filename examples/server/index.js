@@ -1,13 +1,14 @@
 'use strict'
 
 const { styleText } = require('node:util')
+const { once } = require('node:events')
 const { json } = require('http-body')
 
 const Redis = require('ioredis')
 const http = require('http')
 
 const redis = new Redis()
-const openkey = require('../..')({ redis })
+const openkey = require('../..')({ redis, prefix: 'test-http:' })
 
 const createSend = req => (res, statusCode, body) => {
   console.log(`~> ${req.method} ${req.url} (${statusCode})`)
@@ -62,8 +63,21 @@ const server = http.createServer(async (req, res) => {
   }
 })
 
-const PORT = 1337
+const listen = async (server, port, callback) => {
+  try {
+    server.listen(port)
+    await once(server, 'listening')
+    return callback(port)
+  } catch (error) {
+    if (error.code === 'EADDRINUSE') {
+      console.log(`Port ${port} is in use`)
+      return listen(server, ++port, callback)
+    } else {
+      throw error
+    }
+  }
+}
 
-server.listen(PORT, () => {
-  console.log(`Server is listening on port http://localhost:${PORT}`)
+listen(server, 3000, port => {
+  console.log(`Server is listening on port http://localhost:${port}`)
 })
