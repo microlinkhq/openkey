@@ -37,11 +37,12 @@ test('.create # error if plan does not exist', async t => {
 })
 
 test('.create', async t => {
-  const key = await openkey.keys.create()
+  const key = await openkey.keys.create({ metadata: { email: 'hello@microlink.io' } })
   t.truthy(key.createdAt)
   t.is(key.createdAt, key.updatedAt)
   t.is(key.value.length, 16)
   t.true(key.enabled)
+  t.deepEqual(key.metadata, { email: 'hello@microlink.io' })
 })
 
 test('.create # associate a plan', async t => {

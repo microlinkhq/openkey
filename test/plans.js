@@ -251,7 +251,65 @@ test(".update # don't update invalid `period`", async t => {
   t.deepEqual(await openkey.plans.retrieve(id), { ...plan, updatedAt })
 })
 
-test('.update # add metadata', async t => {
+test('.update # limit', async t => {
+  let plan = await openkey.plans.create({
+    id: randomUUID(),
+    limit: 1,
+    period: '1d'
+  })
+
+  const key = await openkey.keys.create({ plan: plan.id })
+
+  let usage = await openkey.usage(key.value)
+
+  t.is(usage.limit, 1)
+  t.is(usage.remaining, 1)
+
+  usage = await openkey.usage.increment(key.value)
+
+  t.is(usage.limit, 1)
+  t.is(usage.remaining, 0)
+
+  plan = await openkey.plans.update(plan.id, { limit: 2 })
+  usage = await openkey.usage(key.value)
+
+  t.is(usage.limit, 2)
+  t.is(usage.remaining, 1)
+})
+
+test('.update # period', async t => {
+  let plan = await openkey.plans.create({
+    id: randomUUID(),
+    limit: 1,
+    period: '1ms'
+  })
+
+  const key = await openkey.keys.create({ plan: plan.id })
+
+  let usage = await openkey.usage(key.value)
+
+  t.is(usage.limit, 1)
+  t.is(usage.remaining, 1)
+
+  usage = await openkey.usage.increment(key.value)
+
+  const oldReset = usage.reset
+
+  t.is(usage.limit, 1)
+  t.is(usage.remaining, 0)
+
+  const now = Date.now()
+  plan = await openkey.plans.update(plan.id, { period: '3s', limit: 2 })
+
+  await setTimeout(0) // ensure time move forward
+  usage = await openkey.usage(key.value)
+
+  const acceptableDelta = 100 // 100 milliseconds tolerance
+  t.true(Math.abs(usage.reset - (now + 3000)) <= acceptableDelta)
+  t.true(oldReset < usage.reset)
+})
+
+test('.update # metadata', async t => {
   {
     const { id } = await openkey.plans.create({
       id: randomUUID(),
