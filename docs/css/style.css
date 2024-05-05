@@ -126,6 +126,7 @@
   --gray-400: #5D666F;
   --gray-300: #4D555C;
   --gray-200: #40474C;
+  --gray-100: #33383D;
 
 
   /* theme */
@@ -140,7 +141,7 @@
 
 ::selection {
   background: var(--ds-amber-500);
-  color: #f0f6fc;
+  color: var(--gray-900);
 }
 
 /* emulate https://twitter.com/heyirfanaziz/status/1751515771954683934 */
@@ -184,8 +185,6 @@ img[src*='#gh-dark-mode-only'] {
   display: none;
 }
 
-
-
 main {
   display: block;
   position: relative;
@@ -196,9 +195,12 @@ main {
 
 .sidebar {
   font-family: var(--sans-serif-font);
-  padding: 40px;
+  padding-top: 72px;
+  padding-bottom: 40px;
+  padding-left: 36px;
+  padding-right: 0;
   width: 300px;
-  transition: transform 0.25s ease-out;
+  transition: transform 0.3s ease-out;
   overflow: auto;
   height: 100vh;
 }
@@ -227,7 +229,7 @@ main {
 }
 
 .sidebar ul li a {
-  color: var(--gray8);
+  color: var(--primary-color);
   display: block;
   font-size: 14px;
   text-decoration: none;
@@ -253,16 +255,15 @@ main {
 }
 
 .sidebar:hover::-webkit-scrollbar-thumb {
-  background: hsla(0, 0%, 53%, 0.4);
+  background: var(--gray-100);
 }
 
-.sidebar:hover::-webkit-scrollbar-track {
-  background: hsla(0, 0%, 53%, 0.1);
-}
-
-body.sticky .sidebar,
-body.sticky .sidebar-toggle {
+.sidebar {
   position: fixed;
+}
+
+.sidebar-toggle {
+  display: none;
 }
 
 .content {
@@ -272,7 +273,7 @@ body.sticky .sidebar-toggle {
   bottom: 0;
   left: 300px;
   position: absolute;
-  transition: left 0.25s ease;
+  transition: left 0.3s ease;
 }
 
 .markdown-section {
@@ -311,24 +312,67 @@ body.sticky .sidebar-toggle {
 }
 
 @media print {
-
   .github-corner,
-  .sidebar,
-  .sidebar-toggle {
+  .sidebar {
     display: none;
   }
 }
 
 @media screen and (max-width: 768px) {
+  #heading {
+    font-size: 72px;
+  }
+
+  .github-corner svg {
+    height: 62px !important;
+    width: 62px !important;
+  }
 
   .github-corner,
   .sidebar {
     position: fixed;
   }
 
-  .sidebar,
+  .sidebar {
+    left: -300px;
+  }
+
   .sidebar-toggle {
+    display: inherit;
+    border: 0;
+    outline: none;
+    padding: 0 10px;
+    left: 6px;
+    transition: opacity 0.3s;
+    z-index: 4;
+    position: fixed;
+    top: 0;
+    height: 62px;
+    width: 100%;
+    background: var(--background-color);
+  }
+
+  .sidebar-toggle span {
+    background-color: var(--ds-gray-1000);
+    display: block;
+    margin-bottom: 5px;
+    width: 24px;
+    height: 3px;
+  }
+
+  body.sidebar-toggle {
     display: none;
+  }
+
+  body.close .sidebar,
+  body.close .content  {
+    transform: translateX(280px);
+  }
+
+  body.close .sidebar-toggle {
+    background: var(--background-color);
+    transition: background-color 0.3s;
+    width: 284px;
   }
 
   main {
@@ -341,7 +385,7 @@ body.sticky .sidebar-toggle {
     max-width: 100vw;
     position: static;
     padding-top: 20px;
-    transition: transform 0.25s ease;
+    transition: transform 0.3s ease;
   }
 
   .github-corner:hover .octo-arm {
