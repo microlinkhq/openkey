@@ -46,7 +46,7 @@ jobs:
         with:
           node-version: lts/*
       - name: Setup PNPM
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v3
         with:
           version: latest
           run_install: true
@@ -54,18 +54,18 @@ jobs:
         uses: supercharge/redis-github-action@1.8.0
       - name: Test
         run: pnpm test
-      # - name: Report
-      #   run: npx c8 report --reporter=text-lcov > coverage/lcov.info
-      # - name: Coverage
-      #   uses: coverallsapp/github-action@main
-      #   with:
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
-      # - name: Release
-      #   env:
-      #     GH_TOKEN: ${{ secrets.GH_TOKEN }}
-      #     NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-      #   run: |
-      #     git config --global user.email ${{ secrets.GIT_EMAIL }}
-      #     git config --global user.name ${{ secrets.GIT_USERNAME }}
-      #     git pull origin master
-      #     pnpm run release
+      - name: Report
+        run: npx c8 report --reporter=text-lcov > coverage/lcov.info
+      - name: Coverage
+        uses: coverallsapp/github-action@main
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Release
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          git config --global user.email ${{ secrets.GIT_EMAIL }}
+          git config --global user.name ${{ secrets.GIT_USERNAME }}
+          git pull origin master
+          pnpm run release

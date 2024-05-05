@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: lts/*
       - name: Setup PNPM
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v3
         with:
           version: latest
           run_install: true
@@ -30,9 +30,9 @@ jobs:
         uses: supercharge/redis-github-action@1.8.0
       - name: Test
         run: pnpm test
-      # - name: Report
-      #   run: npx c8 report --reporter=text-lcov > coverage/lcov.info
-      # - name: Coverage
-      #   uses: coverallsapp/github-action@main
-      #   with:
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Report
+        run: npx c8 report --reporter=text-lcov > coverage/lcov.info
+      - name: Coverage
+        uses: coverallsapp/github-action@main
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
