@@ -1,66 +1,331 @@
 <div align="center">
-  <img src="https://github.com/microlinkhq/openkey/raw/master/design/banner.png#gh-light-mode-only" alt="microlink logo">
-  <img src="https://github.com/microlinkhq/openkey/raw/master/design/banner-dark.png#gh-dark-mode-only" alt="microlink logo">
+   <h1 id="heading">OPENKEY</h1>
+   <p><img src="https://img.shields.io/github/tag/microlinkhq/openkey.svg?style=flat-square" data-origin="https://img.shields.io/github/tag/microlinkhq/openkey.svg?style=flat-square" alt="Last version">
+      <a href="https://coveralls.io/github/microlinkhq/openkey" target="_blank" rel="noopener" class="no-external-icon"><img src="https://img.shields.io/coveralls/microlinkhq/openkey.svg?style=flat-square" data-origin="https://img.shields.io/coveralls/microlinkhq/openkey.svg?style=flat-square" alt="Coverage Status"></a>
+      <a href="https://www.npmjs.org/package/openkey" target="_blank" rel="noopener" class="no-external-icon"><img src="https://img.shields.io/npm/dm/openkey.svg?style=flat-square" data-origin="https://img.shields.io/npm/dm/openkey.svg?style=flat-square" alt="NPM Status"></a>
+   </p>
 </div>
 
-![Last version](https://img.shields.io/github/tag/microlinkhq/openkey.svg?style=flat-square)
-[![Coverage Status](https://img.shields.io/coveralls/microlinkhq/openkey.svg?style=flat-square)](https://coveralls.io/github/microlinkhq/openkey)
-[![NPM Status](https://img.shields.io/npm/dm/openkey.svg?style=flat-square)](https://www.npmjs.org/package/openkey)
+<br>
 
-**openkey** is:
-  - Authentication & rate limit control for HTTP, backed by Redis.
-  - Cheap at any scale, portable to any cloud. No vendor lock-in.
-  - Developed to be used millions of times every day.
-  - Designed with the best ractices for readability.
-  - Heavily tested, with pitfalls preventions.
+Tired of not owning the authentication flow of your SaaS?
 
-## Installation
+**openkey** is a ~200 lines backed in Redis for control authentication flow. You can deploy to any cloud provider, no vendor lock-in, being cheap at any scale & focused in performance to authenticate requests.
 
-You can install it via npm:
+# Installation
+
+First, Install **openkey** from your preferred node package manager:
 
 ```sh
-$ npm install openkey
+pnpm install openkey
 ```
 
-## Concepts
+# CLI
 
-<div align="center">
-  <img src="https://github.com/microlinkhq/openkey/raw/master/design/concepts.png#gh-light-mode-only" alt="microlink logo">
-  <img src="https://github.com/microlinkhq/openkey/raw/master/design/concepts-dark.png#gh-dark-mode-only" alt="microlink logo">
-  <br>
-</div>
+**openkey** is also available as CLI when you install it globally in your system:
 
-**openkey** orbits around three concepts:
+```sh
+npm install -g openkey
+```
 
-- **Plans**: Represents the quota, rate limit, and throttle information specified as a plan.
-- **Keys**: Represents the credentials used during the authentication step and which plan is associated.
-- **Usage**: Keep track of how much plan is available and consumed with the associated key.
+After that, you can access to any command from your terminal:
 
-## FAQ
+```sh
+❯ openkey
+openkey> help
+version exit keys plans usage stats
+openkey> version
+1.0.0
+openkey> exit
+```
 
-### Why?
+# Usage
 
-Until **openkey**, we use AWS Gateway feature for keys and plans for years. Although it was doing the job, it forced us to send all [api.microlink.io](https://api.microlink.io) traffic to AWS first for the control traffic, and then travel back to origin servers. We wanted to avoid that hop to provide a more responsive service.
+After installation, initialize **openkey**:
 
-### Is it a AWS Gateway replacement?
+```js
+const Redis = require('ioredis')
+const redis = new Redis()
+const openkey = require('openkey')({ redis })
+```
 
-No, and we are not aspiring for it. We used to use a very specific feature present in the AWS Gateway service, and **openkey** is a replacement for that features.
+you can prepend all the keys by passing `prefix`:
 
-We wanted to own the authentication & rate limit of our service. AWS Gateway can still do a lot of more things that this library.
+```js
+const openkey = require('openkey')({ redis, prefix: 'http:' })
+```
 
-### Why not TypeScript?
+These will allow you to acess to **openkey** core concepts: **plans**, **keys**, **usage**, and **stats**.
+
+## .plans
+
+It represents the quota, rate limit, and throttle information specified as a plan.
+
+### .create
+
+It creates & returns a plan:
+
+```js
+const plan = await openkey.plans.create({
+  name: 'free tier',
+  description: 'this is optional',
+  metadata: { tier: 'free' },
+  quota: { limit: 3000, period: 'day' },
+  throttle: { burstLimit: 1000, rateLimit: 10 }
+})
+```
+
+The **options** accepted are:
+
+- `id`<span class="type">string</span>: The id of the plan, it cannot contain whitespaces.
+- `period`<span class="type">string</span>: The time window which the limit applies. It accepts [ms](https://www.npmjs.com/package/ms) syntax.
+- `limit`<span class="type">number</span>: The target maximum number of requests that can be made in a given time period.
+- `burst`<span class="type">number</span>: The number of concurrent requests.
+- `rate`<span class="type">number</span>: The rate, in requests per second.
+- `metadata`<span class="type">object</span>: A flat object containing additional information.
+
+Any other field provided will be omitted.
+
+**Returns**: an object with the options specified, plus:
+
+- `createdAt`<span class="type">number</span>: The timestamp when the object was created.
+- `updatedAt`<span class="type">number</span>: The last timestamp when the object was modified.
+
+### .retrieve
+
+It retrieves a plan by id:
+
+```js
+const { createdAt, updatedAt, ...plan } = await openkey.plans.retrieve('free_tier')
+```
+
+**Returns**: the `plan` object, or `null` if it is not found.
+
+### .update
+
+It updates a plan by id:
+
+```js
+const { updatedAt, ...plan } = await openkey.plans.update('free_tier', {
+  limit: 1000
+})
+```
+
+You can't update the `id`. Also, in the same way than [.create](#create), any other field that is not a supported option will be omitted.
+
+**Returns**: the updated `plan` object. If the plan is not found, this method will throw an error.
+
+## .keys
+
+It represents the credentials used for authenticating a plan.
+
+### .create
+
+It creates & returns a key. A key can have a plan associated:
+
+```js
+const plan = await openkey.plans.create({
+  id: 'free_tier',
+  limit: 1000,
+  period: '24h'
+})
+
+const { id, value } = await openkey.keys.create({ plan: plan.id })
+```
+
+The **options** accepted are:
+
+- `value`<span class="type">string</span>: The value of the key, being a base58 16 length key generated by default.
+- `enabled`<span class="type">string</span>: It determines if the key is active, being `true` by default.
+- `metadata`<span class="type">object</span>: A flat object containing additional information.
+
+Any other field provided will be omitted.
+
+**Returns**: an object with the options specified, plus:
+
+- `createdAt`<span class="type">number</span>: The timestamp when the object was created.
+- `updatedAt`<span class="type">number</span>: The last timestamp when the object was modified.
+
+### .retrieve
+
+It retrieves a key by id:
+
+```js
+const { createdAt, updatedAt, ...key } = await openkey.key.retrieve('AN4fJ')
+```
+
+**Returns**: the `key` object, or `null` if it is not found.
+
+### .update
+
+It updates a key by id:
+
+```js
+const { updatedAt, ...key } = await openkey.key.update(id, {
+  enabled: false
+})
+```
+
+In the same way than [.create](#create-1), any other field that is not a supported option will be omitted.
+
+**Returns**: the updated `key` object. If the key is not found, this method will throw an error.
+
+## .usage
+
+It returns the current usage of a key that is associated with a plan:
+
+```js
+const usage = await openkey.usage(key.value)
+console.log(usage)
+// {
+//   limit: 3,
+//   remaining: 3,
+//   reset: 1714571966087,
+//   pending: Promise { [] }
+// }
+```
+
+### .increment
+
+Similar to the previous method, but increments the usage by one before returning:
+
+```js
+const usage = await openkey.usage.increment(key.value)
+// {
+//   limit: 3,
+//   remaining: 2,
+//   reset: 1714571966087,
+//   pending: Promise { [] }
+// }
+```
+
+Additionally you can increment specifying the `quantity`:
+
+```js
+const usage = await openkey.usage.increment(key.value, { quantity: 3 })
+// {
+//   limit: 3,
+//   remaining: 0,
+//   reset: 1714571966087,
+//   pending: Promise { [] }
+// }
+```
+
+## .stats
+
+It returns the count per every day for a given API key:
+
+```js
+const stats = await openkey.stats(key.value)
+console.log(stats)
+// [
+//   { date: '2024-05-01', count: 1 },
+//   { date: '2024-05-02', count: 10 },
+//   { date: '2024-05-03', count: 5 }
+// ]
+```
+
+# Compression & serialization
+
+By default, **openkey** uses JSON serialization without compression for two reasons:
+
+- The payload isn't large enough to take advantage of compression.
+- Storing compressed data makes the content unreadable without first decompressing it.
+
+You can customize `serialize` and `deserialize` when **openkey** is instantiated to define how you want your data to be handled.
+
+For example, you can combine **openkey** with [compress-brotli](https://github.com/Kikobeats/compress-brotli) to store compressed data painlessly:
+
+```js
+const compressBrotli = require('compress-brotli')
+const redis = new Redis()
+
+const openkey = require('openkey')({
+  redis,
+  serialize: async data => brotli.serialize(await brotli.compress(data)),
+  deserialize: data => brotli.decompress(brotli.deserialize(data))
+})
+```
+
+# HTTP fields
+
+**openkey** has been designed to play well according to [RateLimit header fields for HTTP](https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/):
+
+```js
+module.exports = (req, res) => {
+  const apiKey = req.headers['x-api-key']
+  if (!apiKey) send(res, 401)
+  const { pending, ...usage } = await openkey.usage.increment(apiKey)
+  const statusCode = usage.remaining > 0 ? 200 : 429
+  res.setHeader('X-Rate-Limit-Limit', usage.limit)
+  res.setHeader('X-Rate-Limit-Remaining', usage.remaining)
+  res.setHeader('X-Rate-Limit-Reset', usage.reset)
+  return send(res, statusCode, usage)
+}
+```
+
+# Stripe integration
+
+![](https://b.stripecdn.com/docs-statics-srv/assets/usage-based-billing.7815fc3949e9351fd5e39cb2b02e4eca.svg)
+
+**openkey** is about making pricing a part of your product development.
+
+It's an excellent idea to combine it with [Stripe](https://stripe.com/):
+
+```js
+// https://docs.stripe.com/billing/subscriptions/usage-based/implementation-guide
+// Set your secret key. Remember to switch to your live secret key in production.
+// See your keys here: https://dashboard.stripe.com/apikeys
+const stripe = require('stripe')('sk_test_VZqeYMqkpa1bMxXyikghdPCu');
+
+const count = await openkey.usage.get('{{CUSTOMER_KEY}}')
+
+const meterEvent = await stripe.billing.meterEvents.create({
+  event_name: 'alpaca_ai_tokens',
+  payload: {
+    value: count,
+    stripe_customer_id: '{{CUSTOMER_ID}}',
+  },
+});
+```
+
+Read more about [Usage-based billing at Stripe](https://docs.stripe.com/billing/subscriptions/usage-based).
+
+# Error handling
+
+Every possible error thrown by **openkey** has the name `OpenKeyError` unique `code` associated with it.
+
+```js
+if (error.name === 'OpenKeyError') {
+  return send(res, 400, { code: error.code, message: error.message })
+} else {
+  return send(res, 500)
+}
+```
+
+This makes it easier to apply any kind of handling in your application logic.
+
+You can find the [list errors in the source code](https://github.com/microlinkhq/openkey/blob/master/src/error.js).
+
+# Design decisions
+
+## Why Redis?
+
+Mainly because it's a cheap in-memory database at scale, and mature enough to prevent vendor lock-in.
+
+We considered other alternatives such as SQLite, but according to these requeriments Redis is a no brain choice.
+
+## Why not TypeScript?
 
 This library is intended to be used millions of times every day. We wanted to have granular control as much as possible, and adding a TypeScript transpilation layer isn't ideal from a performance and maintenance perspective.
 
-### Why Redis?
+## Why key/value?
 
-We needed a backend layer fast for frequent writes, cheap at scale and mature enough for preventing vendor-lock in. We considered other alternatives such as SQLite, but according with this requeriments Redis is the no brain selection.
+Originally this library was implemented using [hashes](https://redis.io/docs/data-types/hashes), but then since values are stored as string, it's necessary to cast value (for example, from string to number).
 
-### Why key/value?
+Since we need to do that all the time, we prefer to use key/value. Also this approach allow to customize serializer/deserializer, which is JSON by default.
 
-Originally this library was implemented using [hashes](https://redis.io/docs/data-types/hashes), but then since values are stored as string, it's necessary to cast value (for example, from string to number). Since we need to do that all the time, we prefer to use key/value in combination with JSON.parse/JSON.stringify. It makes the code tinier and easier to read.
-
-## License
+# License
 
 **openkey** © [microlink.io](https://microlink.io), released under the [MIT](https://github.com/microlinkhq/openkey/blob/master/LICENSE.md) License.<br>
 Authored and maintained by [microlink.io](https://microlink.io) with help from [contributors](https://github.com/microlinkhq/openkey/contributors).

@@ -1,12 +1,11 @@
 {
   "name": "openkey",
-  "description": "authentication & rate limit for HTTP backed in Redis.",
+  "description": "Fast authentication layer for your SaaS, backed by Redis.",
   "homepage": "https://openkey.js.org",
   "version": "0.0.0",
+  "main": "src/index.js",
   "exports": {
-    ".": "./src/index.js",
-    "./plans": "./src/plans.js",
-    "./keys": "./src/keys.js"
+    ".": "./src/index.js"
   },
   "bin": {
     "openkey": "bin/index.js"
@@ -41,19 +40,29 @@
     "@commitlint/config-conventional": "latest",
     "@ksmithut/prettier-standard": "latest",
     "ava": "5",
+    "browser-sync": "latest",
     "c8": "latest",
     "ci-publish": "latest",
+    "compress-brotli": "latest",
+    "concurrently": "latest",
+    "cssnano": "latest",
+    "cssnano-preset-advanced": "latest",
     "date-fns": "latest",
     "finepack": "latest",
     "git-authors-cli": "latest",
     "github-generate-release": "latest",
+    "gulp": "4",
+    "gulp-concat": "latest",
+    "gulp-postcss": "latest",
+    "gulp-uglify": "latest",
     "ioredis": "latest",
     "nano-staged": "latest",
     "npm-check-updates": "latest",
+    "postcss": "latest",
+    "postcss-focus": "latest",
     "set-now": "latest",
     "simple-git-hooks": "latest",
     "standard": "latest",
-    "standard-markdown": "latest",
     "standard-version": "latest"
   },
   "engines": {
@@ -66,7 +75,9 @@
     "clean": "rm -rf node_modules",
     "contributors": "(npx git-authors-cli && npx finepack && git add package.json && git commit -m 'build: contributors' --no-verify) || true",
     "coverage": "c8 report --reporter=text-lcov > coverage/lcov.info",
-    "lint": "standard-markdown README.md && standard",
+    "dev": "concurrently \"gulp\" \"npm run dev:server\"",
+    "dev:server": "browser-sync start --server --files \"index.html, README.md, static/**/*.(css|js)\"",
+    "lint": "standard",
     "postrelease": "npm run release:tags && npm run release:github && (ci-publish || npm publish --access=public)",
     "prerelease": "npm run update:check",
     "pretest": "npm run lint",
@@ -90,7 +101,7 @@
       "@commitlint/config-conventional"
     ],
     "rules": {
-      "body-max-length": [
+      "body-max-line-length": [
         0
       ]
     }
@@ -99,9 +110,6 @@
     "*.js": [
       "prettier-standard",
       "standard --fix"
-    ],
-    "*.md": [
-      "standard-markdown"
     ],
     "package.json": [
       "finepack"
