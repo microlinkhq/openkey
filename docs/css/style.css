@@ -328,7 +328,6 @@ main {
     width: 62px !important;
   }
 
-  .github-corner,
   .sidebar {
     position: fixed;
   }
@@ -338,6 +337,7 @@ main {
   }
 
   .sidebar-toggle {
+    cursor: pointer;
     display: inherit;
     border: 0;
     outline: none;
@@ -600,28 +600,23 @@ body {
   }
 }
 
-.github-corner {
-  z-index: 1;
-}
-
 .github-corner svg {
+  position: fixed;
+  z-index: 1;
   border-bottom: 0;
   position: fixed;
   right: 0;
   text-decoration: none;
   top: 0;
+  color: var(--background-color);
+  fill: var(--accent-color);
+  height: 80px;
+  width: 80px;
 }
 
 .github-corner:hover svg .octo-arm {
   opacity: 1;
   animation: b 560ms ease-in-out;
-}
-
-.github-corner svg {
-  color: var(--background-color);
-  fill: var(--accent-color);
-  height: 80px;
-  width: 80px;
 }
 
 strong {
