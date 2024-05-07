@@ -42,7 +42,7 @@ const assertMetadata = metadata => {
       assert(!isPlainObject(metadata[key]), 'ERR_METADATA_INVALID', () => [key])
       if (metadata[key] === undefined) delete metadata[key]
     })
-    return Object.keys(metadata).length ? metadata : undefined
+    return Object.keys(metadata).length ? metadata : false
   }
 }
 
