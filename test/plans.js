@@ -145,17 +145,13 @@ test('.create', async t => {
     id,
     limit: 1,
     period: '1s',
-    metadata: { tier: 'free' },
-    burst: 1000,
-    rate: 10
+    metadata: { tier: 'free' }
   })
 
   t.truthy(plan.createdAt)
   t.is(plan.createdAt, plan.updatedAt)
   t.deepEqual(plan.metadata, { tier: 'free' })
   t.is(plan.period, '1s')
-  t.is(plan.rate, 10)
-  t.is(plan.burst, 1000)
   t.is(plan.limit, 1)
   t.is(plan.id, id)
 })
