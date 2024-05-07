@@ -1,6 +1,5 @@
 'use strict'
 
-const { pick } = require('./util')
 const { assert, assertMetadata } = require('./error')
 
 module.exports = ({ serialize, deserialize, redis, keys, prefix } = {}) => {
@@ -10,9 +9,7 @@ module.exports = ({ serialize, deserialize, redis, keys, prefix } = {}) => {
    * @param {Object} options - The options for creating a plan.
    * @param {string} options.id - The id of the plan.
    * @param {number} [options.limit] - The target maximum number of requests that can be made in a given time period.
-   * @param {string} [options.period] - The time period in which the limit applies. Valid values are "DAY", "WEEK" or "MONTH".
-   * @param {number} [options.burst] - The burst limit of the plan.
-   * @param {number} [options.rate] - The rate limit of the plan.
+   * @param {string} [options.period] - The time period in which the limit applies.
    * @param {Object} [options.metadata] - Any extra information can be attached here.
    *
    * @returns {Object} The plan object.
@@ -20,16 +17,13 @@ module.exports = ({ serialize, deserialize, redis, keys, prefix } = {}) => {
   const create = async (opts = {}) => {
     assert(typeof opts.id === 'string' && opts.id.length > 0, 'ERR_PLAN_ID_REQUIRED')
     assert(!/\s/.test(opts.id), 'ERR_PLAN_INVALID_ID')
-    const plan = Object.assign(
-      {
-        limit: assert(typeof opts.limit === 'number' && opts.limit > 0 && opts.limit, 'ERR_PLAN_INVALID_LIMIT'),
-        period: assert(
-          typeof opts.period === 'string' && opts.period.length > 0 && opts.period,
-          'ERR_PLAN_INVALID_PERIOD'
-        )
-      },
-      pick(opts, ['rate', 'burst'])
-    )
+    const plan = {
+      limit: assert(typeof opts.limit === 'number' && opts.limit > 0 && opts.limit, 'ERR_PLAN_INVALID_LIMIT'),
+      period: assert(
+        typeof opts.period === 'string' && opts.period.length > 0 && opts.period,
+        'ERR_PLAN_INVALID_PERIOD'
+      )
+    }
     const metadata = assertMetadata(opts.metadata)
     if (metadata) plan.metadata = metadata
     plan.createdAt = plan.updatedAt = Date.now()
@@ -79,23 +73,13 @@ module.exports = ({ serialize, deserialize, redis, keys, prefix } = {}) => {
    * @param {Object} options - The options for updating a plan.
    * @param {number} [options.limit] - The target maximum number of requests that can be made in a given time period.
    * @param {string} [options.period] - The time period in which the limit applies. Valid values are "DAY", "WEEK" or "MONTH".
-   * @param {number} [options.burst] - The burst limit of the plan.
-   * @param {number} [options.rate] - The rate limit of the plan.
    * @param {object} [options.metadata] - Any extra information can be attached here.
    *
    * @returns {Object} The updated plan.
    */
   const update = async (id, opts) => {
-    const currentPlan = await retrieve(id, { throwError: true })
-    const metadata = Object.assign({}, currentPlan.metadata, assertMetadata(opts.metadata))
-
-    const plan = Object.assign(
-      currentPlan,
-      {
-        updatedAt: Date.now()
-      },
-      pick(opts, ['rate', 'burst'])
-    )
+    const plan = await retrieve(id, { throwError: true })
+    const metadata = Object.assign({}, plan.metadata, assertMetadata(opts.metadata))
 
     if (opts.limit) {
       plan.limit = assert(typeof opts.limit === 'number' && opts.limit > 0 && opts.limit, 'ERR_PLAN_INVALID_LIMIT')
@@ -107,6 +91,8 @@ module.exports = ({ serialize, deserialize, redis, keys, prefix } = {}) => {
         'ERR_PLAN_INVALID_PERIOD'
       )
     }
+
+    plan.updatedAt = Date.now()
 
     if (Object.keys(metadata).length) plan.metadata = metadata
     return (await redis.set(prefixKey(id), await serialize(plan))) && plan

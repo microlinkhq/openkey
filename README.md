@@ -70,8 +70,8 @@ const plan = await openkey.plans.create({
   name: 'free tier',
   description: 'this is optional',
   metadata: { tier: 'free' },
-  quota: { limit: 3000, period: 'day' },
-  throttle: { burstLimit: 1000, rateLimit: 10 }
+  limit: 3000,
+  period: '1d'
 })
 ```
 
@@ -80,8 +80,6 @@ The **options** accepted are:
 - `id`<span class="type">string</span>: The id of the plan, it cannot contain whitespaces.
 - `period`<span class="type">string</span>: The time window which the limit applies. It accepts [ms](https://www.npmjs.com/package/ms) syntax.
 - `limit`<span class="type">number</span>: The target maximum number of requests that can be made in a given time period.
-- `burst`<span class="type">number</span>: The number of concurrent requests.
-- `rate`<span class="type">number</span>: The rate, in requests per second.
 - `metadata`<span class="type">object</span>: A flat object containing additional information.
 
 Any other field provided will be omitted.
