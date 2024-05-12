@@ -68,7 +68,6 @@ It creates & returns a plan:
 ```js
 const plan = await openkey.plans.create({
   name: 'free tier',
-  description: 'this is optional',
   metadata: { tier: 'free' },
   limit: 3000,
   period: '1d'
@@ -88,6 +87,14 @@ Any other field provided will be omitted.
 
 - `createdAt`<span class="type">number</span>: The timestamp when the object was created.
 - `updatedAt`<span class="type">number</span>: The last timestamp when the object was modified.
+
+### .list
+
+It retrieves all the plans:
+
+```js
+const plans = await openkey.plans.list()
+```
 
 ### .retrieve
 
