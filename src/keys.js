@@ -1,7 +1,8 @@
 'use strict'
 
 const { pick, uid } = require('./util')
-const { assert, assertMetadata } = require('./error')
+const metadata = require('./metadata')
+const assert = require('./assert')
 
 module.exports = ({ serialize, deserialize, plans, redis, prefix } = {}) => {
   /**
@@ -17,8 +18,8 @@ module.exports = ({ serialize, deserialize, plans, redis, prefix } = {}) => {
    */
   const create = async (opts = {}) => {
     const key = { enabled: opts.enabled ?? true }
-    const metadata = assertMetadata(opts.metadata)
     if (metadata) key.metadata = metadata
+    metadata(key, opts)
     key.createdAt = key.updatedAt = Date.now()
     const value = opts.value ?? (await uid({ redis, size: 16 }))
     if (opts.plan) {
@@ -70,10 +71,8 @@ module.exports = ({ serialize, deserialize, plans, redis, prefix } = {}) => {
    * @returns {Object} The updated plan.
    */
   const update = async (value, opts) => {
-    const currentKey = await retrieve(value, { throwError: true })
-    const metadata = Object.assign({}, currentKey.metadata, assertMetadata(opts.metadata))
-    const key = Object.assign(currentKey, { updatedAt: Date.now() }, pick(opts, ['enabled', 'value', 'plan']))
-    if (Object.keys(metadata).length) key.metadata = metadata
+    let key = await retrieve(value, { throwError: true })
+    key = Object.assign(metadata(key, opts), { updatedAt: Date.now() }, pick(opts, ['enabled', 'value', 'plan']))
     if (key.plan) await plans.retrieve(key.plan, { throwError: true })
     return (await redis.set(prefixKey(value), await serialize(key))) && key
   }
