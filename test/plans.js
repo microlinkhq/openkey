@@ -328,6 +328,24 @@ test('.update # metadata', async t => {
     t.is(plan.metadata.tier, 'free')
     t.is(plan.metadata.version, 2)
   }
+  {
+    const { id } = await openkey.plans.create({
+      id: randomUUID(),
+      limit: 1,
+      period: '1s'
+    })
+
+    const metadata = { tier: 'free', null: 'null', undefined: 'undefined', empty: '' }
+    let plan = await openkey.plans.update(id, { metadata })
+    t.is(plan.metadata.null, 'null')
+    t.is(plan.metadata.undefined, 'undefined')
+    t.is(plan.metadata.empty, undefined)
+    plan = await openkey.plans.update(id, { metadata: { ...metadata, null: null, undefined: '' } })
+    t.is(plan.metadata.null, undefined)
+    t.is(plan.metadata.undefined, undefined)
+    plan = await openkey.plans.update(id, { metadata: null })
+    t.is(plan.metadata, undefined)
+  }
 })
 
 test('.update # error is metadata is not a flat object', async t => {

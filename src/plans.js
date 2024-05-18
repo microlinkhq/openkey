@@ -1,6 +1,7 @@
 'use strict'
 
-const { assert, assertMetadata } = require('./error')
+const assert = require('./assert')
+const metadata = require('./metadata')
 
 module.exports = ({ serialize, deserialize, redis, keys, prefix } = {}) => {
   /**
@@ -24,8 +25,7 @@ module.exports = ({ serialize, deserialize, redis, keys, prefix } = {}) => {
         'ERR_PLAN_INVALID_PERIOD'
       )
     }
-    const metadata = assertMetadata(opts.metadata)
-    if (metadata) plan.metadata = metadata
+    metadata(plan, opts)
     plan.createdAt = plan.updatedAt = Date.now()
     const isCreated = (await redis.set(prefixKey(opts.id), await serialize(plan), 'NX')) === 'OK'
     assert(isCreated, 'ERR_PLAN_ALREADY_EXIST', () => [opts.id])
@@ -78,8 +78,7 @@ module.exports = ({ serialize, deserialize, redis, keys, prefix } = {}) => {
    * @returns {Object} The updated plan.
    */
   const update = async (id, opts) => {
-    const plan = await retrieve(id, { throwError: true })
-    const metadata = Object.assign({}, plan.metadata, assertMetadata(opts.metadata))
+    let plan = await retrieve(id, { throwError: true })
 
     if (opts.limit) {
       plan.limit = assert(typeof opts.limit === 'number' && opts.limit > 0 && opts.limit, 'ERR_PLAN_INVALID_LIMIT')
@@ -92,9 +91,8 @@ module.exports = ({ serialize, deserialize, redis, keys, prefix } = {}) => {
       )
     }
 
-    plan.updatedAt = Date.now()
+    plan = Object.assign(metadata(plan, opts), { updatedAt: Date.now() })
 
-    if (Object.keys(metadata).length) plan.metadata = metadata
     return (await redis.set(prefixKey(id), await serialize(plan))) && plan
   }
 

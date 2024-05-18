@@ -109,7 +109,7 @@ test('.update # error if plan does not exist', async t => {
   t.is(error.code, 'ERR_PLAN_NOT_EXIST')
 })
 
-test('.update # add a plan', async t => {
+test('.update # plan', async t => {
   const plan = await openkey.plans.create({
     id: randomUUID(),
     limit: 3,
@@ -120,7 +120,7 @@ test('.update # add a plan', async t => {
   t.is(key.plan, plan.id)
 })
 
-test('.update # add metadata', async t => {
+test('.update # metadata', async t => {
   {
     const { value } = await openkey.keys.create()
     const key = await openkey.keys.update(value, { metadata: { cc: 'hello@microlink.io' } })
@@ -133,6 +133,19 @@ test('.update # add metadata', async t => {
 
     t.is(key.metadata.cc, 'hello@microlink.io')
     t.is(key.metadata.version, 2)
+  }
+  {
+    const { value } = await openkey.keys.create()
+    const metadata = { tier: 'free', null: 'null', undefined: 'undefined', empty: '' }
+    let key = await openkey.keys.update(value, { metadata })
+    t.is(key.metadata.null, 'null')
+    t.is(key.metadata.undefined, 'undefined')
+    t.is(key.metadata.empty, undefined)
+    key = await openkey.keys.update(value, { metadata: { ...metadata, null: null, undefined: '' } })
+    t.is(key.metadata.null, undefined)
+    t.is(key.metadata.undefined, undefined)
+    key = await openkey.keys.update(value, { metadata: null })
+    t.is(key.metadata, undefined)
   }
 })
 

@@ -1,7 +1,5 @@
 'use strict'
 
-const { isPlainObject } = require('./util')
-
 class OpenKeyError extends Error {
   constructor (props) {
     super()
@@ -26,24 +24,4 @@ const errors = [
   return acc
 }, {})
 
-const assert = (condition, code, args = () => []) => {
-  return (
-    condition ||
-    (() => {
-      throw errors[code](args)
-    })()
-  )
-}
-
-const assertMetadata = metadata => {
-  if (metadata) {
-    assert(isPlainObject(metadata), 'ERR_METADATA_NOT_FLAT_OBJECT')
-    Object.keys(metadata).forEach(key => {
-      assert(!isPlainObject(metadata[key]), 'ERR_METADATA_INVALID', () => [key])
-      if (metadata[key] === undefined) delete metadata[key]
-    })
-    return Object.keys(metadata).length ? metadata : false
-  }
-}
-
-module.exports = { errors, assert, assertMetadata }
+module.exports = { errors }
