@@ -63,7 +63,7 @@ It represents the quota, rate limit, and throttle information specified as a pla
 
 ### .create
 
-It creates & returns a plan:
+It creates a new plan:
 
 ```js
 const plan = await openkey.plans.create({
@@ -120,22 +120,45 @@ You can't update the `id`. Also, in the same way than [.create](#create), any ot
 
 **Returns**: the updated `plan` object. If the plan is not found, this method will throw an error.
 
+### .del
+
+It deletes a plan by id:
+
+```js
+await openkey.plans.del('free_tier')
+```
+
+It will throw an error if:
+
+- The plan has key associated. In that case, first keys needs to be deleted.
+- The plan id doesn't exist.
+
+**Returns** A boolean confirming the plan has been deleted.
+
 ## .keys
 
 It represents the credentials used for authenticating a plan.
 
 ### .create
 
-It creates & returns a key. A key can have a plan associated:
+It creates a new key:
 
 ```js
-const plan = await openkey.plans.create({
-  id: 'free_tier',
-  limit: 1000,
-  period: '24h'
-})
+/*
+ * A random 16 length base58 key is created by default.
+ */
+const key = await openkey.key.create()
+console.log(key.value) // => 'oKLJkVqqG2zExUYD'
 
-const { id, value } = await openkey.keys.create({ plan: plan.id })
+/**
+ * You can provide a value to use.
+ */
+const key = await openkey.key.create({ value: 'oKLJkVqqG2zExUYD' })
+
+/**
+ * The key can be associated with a plan when it's created.
+ */
+const key = await openkey.key.create({ value: 'oKLJkVqqG2zExUYD', plan: plan.id })
 ```
 
 The **options** accepted are:
@@ -166,7 +189,7 @@ const { createdAt, updatedAt, ...key } = await openkey.key.retrieve('AN4fJ')
 It updates a key by id:
 
 ```js
-const { updatedAt, ...key } = await openkey.key.update(id, {
+const { updatedAt, ...key } = await openkey.key.update(value, {
   enabled: false
 })
 ```
@@ -174,6 +197,18 @@ const { updatedAt, ...key } = await openkey.key.update(id, {
 In the same way than [.create](#create-1), any other field that is not a supported option will be omitted.
 
 **Returns**: the updated `key` object. If the key is not found, this method will throw an error.
+
+### .del
+
+It deletes a key by value:
+
+```js
+await openkey.plans.del(value)
+```
+
+It will throw an error if the key value doesn't exist.
+
+**Returns** A boolean confirming the plan has been deleted.
 
 ## .usage
 
