@@ -12,6 +12,7 @@ module.exports = ({ plans, keys, redis, stats, prefix, serialize, deserialize })
    * @param {Object} options - The options for creating a plan.
    * @param {number} [options.quantity=1] - The quantity to increment.
    * @param {boolean} [options.throwError=true] - Throw an error if the key does not exist.
+   * @param {number} [options.timestamp=Date.now()] - The timestamp to use for the increment.
    *
    * @returns {Promise<{limit: number, remaining: number, reset: number, pending: Promise<void>}>}
    *
@@ -25,21 +26,19 @@ module.exports = ({ plans, keys, redis, stats, prefix, serialize, deserialize })
    * // }
    *
    */
-  const increment = async (keyValue, { quantity = 1, throwError = true } = {}) => {
+  const increment = async (keyValue, { timestamp = Date.now(), quantity = 1, throwError = true } = {}) => {
     const key = await keys.retrieve(keyValue, { throwError })
     const plan = await plans.retrieve(key.plan, { throwError })
-
     let usage = await deserialize(await redis.get(prefixKey(keyValue)))
-    const now = Date.now()
 
     if (usage === null) {
       usage = {
         count: Math.min(quantity, plan.limit),
-        reset: now + ms(plan.period)
+        reset: timestamp + ms(plan.period)
       }
-    } else if (now > usage.reset) {
+    } else if (timestamp > usage.reset) {
       usage.count = quantity
-      usage.reset = now + ms(plan.period)
+      usage.reset = timestamp + ms(plan.period)
     } else {
       if (usage.count < plan.limit) {
         usage.count = Math.min(usage.count + quantity, plan.limit)
