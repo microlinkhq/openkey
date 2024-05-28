@@ -66,6 +66,8 @@ module.exports = ({ serialize, deserialize, plans, redis, prefix } = {}) => {
    * @param {string} value - The value of the plan.
    * @param {Object} options - The options for updating a plan.
    * @param {string} [options.value] - The value of the key.
+   * @param {string} [options.plan] - The id of the plan associated.
+   * @param {string} [options.enabled] - Whether the key is enabled or not.
    * @param {object} [options.metadata] - Any extra information can be attached here.
    *
    * @returns {Object} The updated plan.
