@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### 0.0.9 (2024-05-29)
+
+
+### Bug Fixes
+
+* ensure to treat timestamp properly ([#26](https://github.com/microlinkhq/openkey/issues/26)) ([6e61720](https://github.com/microlinkhq/openkey/commit/6e617202db996b4b6bb09c814a3fb987e6760e7e))
+
 ### 0.0.8 (2024-05-28)
 
 ### 0.0.7 (2024-05-18)
