@@ -60,7 +60,6 @@
     "npm-check-updates": "latest",
     "postcss": "latest",
     "postcss-focus": "latest",
-    "set-now": "latest",
     "simple-git-hooks": "latest",
     "standard": "latest",
     "standard-version": "latest"

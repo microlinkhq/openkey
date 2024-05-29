@@ -26,10 +26,11 @@ module.exports = ({ plans, keys, redis, stats, prefix, serialize, deserialize })
    * // }
    *
    */
-  const increment = async (keyValue, { timestamp = Date.now(), quantity = 1, throwError = true } = {}) => {
+  const increment = async (keyValue, { date = new Date(), quantity = 1, throwError = true } = {}) => {
     const key = await keys.retrieve(keyValue, { throwError })
     const plan = await plans.retrieve(key.plan, { throwError })
     let usage = await deserialize(await redis.get(prefixKey(keyValue)))
+    const timestamp = date.getTime()
 
     if (usage === null) {
       usage = {
@@ -47,7 +48,10 @@ module.exports = ({ plans, keys, redis, stats, prefix, serialize, deserialize })
 
     const pending =
       quantity > 0
-        ? Promise.all([redis.set(prefixKey(keyValue), await serialize(usage)), stats.increment(keyValue, quantity)])
+        ? Promise.all([
+          redis.set(prefixKey(keyValue), await serialize(usage)),
+          stats.increment(keyValue, quantity, date)
+        ])
         : Promise.resolve([])
 
     return {
@@ -59,7 +63,7 @@ module.exports = ({ plans, keys, redis, stats, prefix, serialize, deserialize })
   }
 
   /**
-   * Get usage for a given key.
+   * Get the current usage for a given key.
    *
    * @param {string} keyValue
    *
