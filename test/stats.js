@@ -1,7 +1,5 @@
 'use strict'
 
-require('set-now')
-
 const { addDays } = require('date-fns')
 const { randomUUID } = require('crypto')
 const Redis = require('ioredis')
@@ -35,23 +33,19 @@ test.serial('.increment # by one', async t => {
   let data = await openkey.usage.increment(key.value)
   await data.pending
 
-  Date.setNow(addDays(Date.now(), 1))
   await Promise.all(
     [...Array(10).keys()].map(async () => {
-      data = await openkey.usage.increment(key.value)
+      data = await openkey.usage.increment(key.value, { date: addDays(Date.now(), 1) })
       await data.pending
     })
   )
 
-  Date.setNow(addDays(Date.now(), 1))
   await Promise.all(
     [...Array(5).keys()].map(async () => {
-      data = await openkey.usage.increment(key.value)
+      data = await openkey.usage.increment(key.value, { date: addDays(Date.now(), 2) })
       await data.pending
     })
   )
-
-  Date.setNow()
 
   t.deepEqual(await openkey.stats(key.value), [
     { date: openkey.stats.formatYYYMMDDDate(), count: 1 },
@@ -71,15 +65,11 @@ test.serial('.increment # by more than one', async t => {
   const data = await openkey.usage.increment(key.value)
   await data.pending
 
-  Date.setNow(addDays(Date.now(), 1))
-  await openkey.usage.increment(key.value, { quantity: 10 })
+  await openkey.usage.increment(key.value, { quantity: 10, date: addDays(Date.now(), 1) })
   await data.pending
 
-  Date.setNow(addDays(Date.now(), 1))
-  await openkey.usage.increment(key.value, { quantity: 5 })
+  await openkey.usage.increment(key.value, { quantity: 5, date: addDays(Date.now(), 2) })
   await data.pending
-
-  Date.setNow()
 
   t.deepEqual(await openkey.stats(key.value), [
     { date: openkey.stats.formatYYYMMDDDate(), count: 1 },

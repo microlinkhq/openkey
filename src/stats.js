@@ -31,8 +31,8 @@ return current
 module.exports = ({ redis, prefix }) => {
   const prefixKey = key => `${prefix}stats:${key}`
 
-  const increment = (keyValue, quantity = 1) =>
-    redis.eval(LUA_INCREMENT_AND_EXPIRE, 1, `${prefixKey(keyValue)}:${formatYYYMMDDDate()}`, TTL, quantity)
+  const increment = (keyValue, quantity = 1, date = new Date()) =>
+    redis.eval(LUA_INCREMENT_AND_EXPIRE, 1, `${prefixKey(keyValue)}:${formatYYYMMDDDate(date)}`, TTL, quantity)
 
   /**
    * Get stats for a given key.
