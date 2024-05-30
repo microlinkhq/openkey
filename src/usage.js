@@ -2,6 +2,8 @@
 
 const ms = require('ms')
 
+const reset = ({ period }) => Date.now() + ms(period)
+
 module.exports = ({ plans, keys, redis, stats, prefix, serialize, deserialize }) => {
   const prefixKey = key => `${prefix}usage:${key}`
 
@@ -35,11 +37,11 @@ module.exports = ({ plans, keys, redis, stats, prefix, serialize, deserialize })
     if (usage === null) {
       usage = {
         count: Math.min(quantity, plan.limit),
-        reset: timestamp + ms(plan.period)
+        reset: reset(plan)
       }
     } else if (timestamp > usage.reset) {
       usage.count = quantity
-      usage.reset = timestamp + ms(plan.period)
+      usage.reset = reset(plan)
     } else {
       if (usage.count < plan.limit) {
         usage.count = Math.min(usage.count + quantity, plan.limit)
