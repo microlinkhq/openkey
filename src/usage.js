@@ -43,9 +43,7 @@ module.exports = ({ plans, keys, redis, stats, prefix, serialize, deserialize })
       usage.count = quantity
       usage.reset = reset(plan)
     } else {
-      if (usage.count < plan.limit) {
-        usage.count = Math.min(usage.count + quantity, plan.limit)
-      }
+      usage.count = Math.min(usage.count + quantity, plan.limit)
     }
 
     const pending =
