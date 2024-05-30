@@ -30,10 +30,9 @@
   },
   "keywords": [],
   "dependencies": {
-    "http-body": "~1.0.11",
+    "json-buffer": "~3.0.1",
     "mri": "~1.2.0",
-    "ms": "~2.1.3",
-    "send-http": "~1.0.6"
+    "ms": "~2.1.3"
   },
   "devDependencies": {
     "@commitlint/cli": "latest",
@@ -62,7 +61,8 @@
     "postcss-focus": "latest",
     "simple-git-hooks": "latest",
     "standard": "latest",
-    "standard-version": "latest"
+    "standard-version": "latest",
+    "superlock": "latet"
   },
   "engines": {
     "node": ">= 18"

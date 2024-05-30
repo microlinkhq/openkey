@@ -1,6 +1,7 @@
 'use strict'
 
 const { setTimeout } = require('timers/promises')
+const { withLock } = require('superlock')
 const { randomUUID } = require('crypto')
 const Redis = require('ioredis')
 const test = require('ava')
@@ -109,4 +110,29 @@ test(".increment # don't increment more than the limit", async t => {
     t.is(usage.limit, 3)
     t.is(usage.remaining, 0)
   }
+})
+
+test('.increment # handle race conditions (using superlock)', async t => {
+  const lock = withLock()
+
+  const plan = await openkey.plans.create({
+    id: randomUUID(),
+    limit: 1000,
+    period: '100ms'
+  })
+  const key = await openkey.keys.create({ plan: plan.id })
+
+  await Promise.all(
+    [...Array(100).keys()].map(() =>
+      lock(async () => {
+        const { pending, ...usage } = await openkey.usage.increment(key.value)
+        await pending
+        return usage
+      })
+    )
+  )
+
+  const usage = await openkey.usage(key.value)
+  t.is(usage.limit, 1000)
+  t.is(usage.remaining, 900)
 })
