@@ -376,4 +376,4 @@ In case you need it, you can combine **openkey** with [superlock](https://github
 **openkey** © [microlink.io](https://microlink.io), released under the [MIT](https://github.com/microlinkhq/openkey/blob/master/LICENSE.md) License.<br>
 Authored and maintained by [microlink.io](https://microlink.io) with help from [contributors](https://github.com/microlinkhq/openkey/contributors).
 
-> [microlink.io](https://microlink.io) · GitHub [microlink.io](https://github.com/microlinkhq) · Twitter [@microlinkhq](https://twitter.com/microlinkhq)
+> [microlink.io](https://microlink.io) · GitHub [microlink.io](https://github.com/microlinkhq) · X [@microlinkhq](https://x.com/microlinkhq)
