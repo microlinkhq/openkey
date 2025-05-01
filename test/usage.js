@@ -5,6 +5,7 @@ const { withLock } = require('superlock')
 const { randomUUID } = require('crypto')
 const Redis = require('ioredis')
 const test = require('ava')
+const ms = require('ms')
 
 const { testCleanup, PERIOD } = require('./helpers')
 
@@ -78,7 +79,7 @@ test('.increment', async t => {
   data = await openkey.usage.increment(key.value)
   await data.pending
   t.is(data.remaining, 0)
-  await setTimeout(100)
+  await setTimeout(ms(PERIOD))
   data = await openkey.usage(key.value)
   t.is(data.remaining, 3)
 })
