@@ -5,7 +5,7 @@ const { randomUUID } = require('crypto')
 const Redis = require('ioredis')
 const test = require('ava')
 
-const { testCleanup } = require('./helpers')
+const { testCleanup, PERIOD } = require('./helpers')
 
 const redis = new Redis()
 
@@ -26,7 +26,7 @@ test.serial('.increment # by one', async t => {
   const plan = await openkey.plans.create({
     id: randomUUID(),
     limit: 3,
-    period: '100ms'
+    period: PERIOD
   })
 
   const key = await openkey.keys.create({ plan: plan.id })
@@ -58,7 +58,7 @@ test.serial('.increment # by more than one', async t => {
   const plan = await openkey.plans.create({
     id: randomUUID(),
     limit: 3,
-    period: '100ms'
+    period: PERIOD
   })
 
   const key = await openkey.keys.create({ plan: plan.id })

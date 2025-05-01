@@ -6,7 +6,7 @@ const { randomUUID } = require('crypto')
 const Redis = require('ioredis')
 const test = require('ava')
 
-const { testCleanup } = require('./helpers')
+const { testCleanup, PERIOD } = require('./helpers')
 
 const redis = new Redis()
 
@@ -42,7 +42,7 @@ test('.get', async t => {
   const plan = await openkey.plans.create({
     id: randomUUID(),
     limit: 3,
-    period: '100ms'
+    period: PERIOD
   })
   const key = await openkey.keys.create({ plan: plan.id })
   const usage = await openkey.usage(key.value)
@@ -57,7 +57,7 @@ test('.increment', async t => {
   const plan = await openkey.plans.create({
     id: randomUUID(),
     limit: 3,
-    period: '100ms'
+    period: PERIOD
   })
 
   const key = await openkey.keys.create({ plan: plan.id })
@@ -88,7 +88,7 @@ test(".increment # don't increment more than the limit", async t => {
     const plan = await openkey.plans.create({
       id: randomUUID(),
       limit: 3,
-      period: '100ms'
+      period: PERIOD
     })
     const key = await openkey.keys.create({ plan: plan.id })
     const usage = await openkey.usage.increment(key.value, { quantity: 10 })
@@ -101,7 +101,7 @@ test(".increment # don't increment more than the limit", async t => {
     const plan = await openkey.plans.create({
       id: randomUUID(),
       limit: 3,
-      period: '100ms'
+      period: PERIOD
     })
     const key = await openkey.keys.create({ plan: plan.id })
     await openkey.usage.increment(key.value)
@@ -118,7 +118,7 @@ test('.increment # handle race conditions (using superlock)', async t => {
   const plan = await openkey.plans.create({
     id: randomUUID(),
     limit: 1000,
-    period: '100ms'
+    period: PERIOD
   })
   const key = await openkey.keys.create({ plan: plan.id })
 
