@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### 0.0.11 (2025-05-01)
+
+
+### Bug Fixes
+
+* flaky test ([#30](https://github.com/microlinkhq/openkey/issues/30)) ([d5fe6e8](https://github.com/microlinkhq/openkey/commit/d5fe6e82efdf7cfffdb3851e89c86c806ad533ad))
+
 ### 0.0.10 (2024-05-30)
 
 
