@@ -146,12 +146,8 @@
 
 /* emulate https://twitter.com/heyirfanaziz/status/1751515771954683934 */
 #heading {
-  -webkit-text-fill-color: transparent;
-  background: linear-gradient(180deg, #f0f6fc, #8b949e);
-  background-clip: text;
-  font-optical-sizing: auto;
-  font-size: 96px;
-  margin-top: 0;
+  width: 430px !important;
+  margin-bottom: 3rem;
 }
 
 #subhead {
@@ -161,12 +157,12 @@
   margin-bottom: 1rem;
 }
 
-#github-links {
+#links {
   margin: 0;
   margin-bottom: 4rem;
 }
 
-#github-links a {
+#links a {
   text-decoration: none;
 }
 
@@ -198,7 +194,6 @@ img {
   max-width: 100%;
 }
 
-.github-readme,
 img[src*='#gh-dark-mode-only'] {
   display: none;
 }
@@ -338,7 +333,7 @@ main {
 
 @media screen and (max-width: 768px) {
   #heading {
-    font-size: 72px;
+    font-size: 80% !important;
   }
 
   .github-corner svg {
