@@ -1,8 +1,7 @@
 <div align="center">
   <br>
-  <h1 id="heading">OPENKEY</h1>
   <img
-    class="github-readme"
+    id="heading"
     src="https://raw.githubusercontent.com/microlinkhq/openkey/0bc4adb9e23583d5d373c1692c7b28358d18c7f8/static/images/head.png"
     alt="openkey"
     style="width: 350px;"
@@ -11,7 +10,7 @@
     A scalable, cost-efficient, and high-performance authentication service
   </h6>
   <br>
-  <p id="github-links">
+  <p id="links">
     <img
       src="https://img.shields.io/github/tag/microlinkhq/openkey.svg?style=flat-square"
       alt="Last version"
