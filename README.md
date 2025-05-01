@@ -1,11 +1,45 @@
 <div align="center">
-   <h1 id="heading">OPENKEY</h1>
-   <p><img src="https://img.shields.io/github/tag/microlinkhq/openkey.svg?style=flat-square" data-origin="https://img.shields.io/github/tag/microlinkhq/openkey.svg?style=flat-square" alt="Last version">
-      <a href="https://coveralls.io/github/microlinkhq/openkey" target="_blank" rel="noopener" class="no-external-icon"><img src="https://img.shields.io/coveralls/microlinkhq/openkey.svg?style=flat-square" data-origin="https://img.shields.io/coveralls/microlinkhq/openkey.svg?style=flat-square" alt="Coverage Status"></a>
-      <a href="https://www.npmjs.org/package/openkey" target="_blank" rel="noopener" class="no-external-icon"><img src="https://img.shields.io/npm/dm/openkey.svg?style=flat-square" data-origin="https://img.shields.io/npm/dm/openkey.svg?style=flat-square" alt="NPM Status"></a>
-   </p>
+  <br>
+  <h1 id="heading">OPENKEY</h1>
+  <img
+    class="github-readme"
+    src="https://raw.githubusercontent.com/microlinkhq/openkey/0bc4adb9e23583d5d373c1692c7b28358d18c7f8/static/images/head.png"
+    alt="openkey"
+    style="width: 350px;"
+  >
+  <h6 id="subhead">
+    A scalable, cost-efficient, and high-performance authentication service
+  </h6>
+  <br>
+  <p id="github-links">
+    <img
+      src="https://img.shields.io/github/tag/microlinkhq/openkey.svg?style=flat-square"
+      alt="Last version"
+    >
+    <a
+      href="https://coveralls.io/github/microlinkhq/openkey"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="no-external-icon"
+    >
+      <img
+        src="https://img.shields.io/coveralls/microlinkhq/openkey.svg?style=flat-square"
+        alt="Coverage Status"
+      >
+    </a>
+    <a
+      href="https://www.npmjs.org/package/openkey"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="no-external-icon"
+    >
+      <img
+        src="https://img.shields.io/npm/dm/openkey.svg?style=flat-square"
+        alt="NPM Status"
+      >
+    </a>
+  </p>
 </div>
-
 <br>
 
 Tired of not owning the authentication flow of your SaaS?
@@ -316,7 +350,7 @@ It's an excellent idea to combine it with [Stripe](https://stripe.com/):
 // https://docs.stripe.com/billing/subscriptions/usage-based/implementation-guide
 // Set your secret key. Remember to switch to your live secret key in production.
 // See your keys here: https://dashboard.stripe.com/apikeys
-const stripe = require('stripe')('sk_test_VZqeYMqkpa1bMxXyikghdPCu');
+const stripe = require('stripe')('sk_test_VZqeYMqkpa1bMxXyikghdPCu')
 
 const count = await openkey.usage.get('{{CUSTOMER_KEY}}')
 
@@ -324,9 +358,9 @@ const meterEvent = await stripe.billing.meterEvents.create({
   event_name: 'alpaca_ai_tokens',
   payload: {
     value: count,
-    stripe_customer_id: '{{CUSTOMER_ID}}',
-  },
-});
+    stripe_customer_id: '{{CUSTOMER_ID}}'
+  }
+})
 ```
 
 Read more about [Usage-based billing at Stripe](https://docs.stripe.com/billing/subscriptions/usage-based).

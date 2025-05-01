@@ -151,6 +151,23 @@
   background-clip: text;
   font-optical-sizing: auto;
   font-size: 96px;
+  margin-top: 0;
+}
+
+#subhead {
+  font-size: 1.25rem;
+  font-weight: 400;
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+#github-links {
+  margin: 0;
+  margin-bottom: 4rem;
+}
+
+#github-links a {
+  text-decoration: none;
 }
 
 * {
@@ -181,6 +198,7 @@ img {
   max-width: 100%;
 }
 
+.github-readme,
 img[src*='#gh-dark-mode-only'] {
   display: none;
 }
