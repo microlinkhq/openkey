@@ -1,6 +1,6 @@
 'use strict'
 
-const PERIOD = '100ms'
+const PERIOD = '200ms'
 
 const testCleanup = async ({ test, redis, keys }) => {
   const cleanup = async () => {
