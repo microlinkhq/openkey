@@ -1,5 +1,7 @@
 'use strict'
 
+const PERIOD = '150ms'
+
 const testCleanup = async ({ test, redis, keys }) => {
   const cleanup = async () => {
     const entries = await keys()
@@ -15,4 +17,4 @@ const testCleanup = async ({ test, redis, keys }) => {
   test.beforeEach(cleanup)
 }
 
-module.exports = { testCleanup }
+module.exports = { testCleanup, PERIOD }
