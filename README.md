@@ -400,7 +400,7 @@ Since we need to do that all the time, we prefer to use key/value. Also this app
 
 ## Are writting operations atomic?
 
-No, writes operatoins are not atomic because there are very few use cases where that matters. **openkey** is designed to process a constant stream of requests, where the only thing important to control reaching the limit of each plan.
+No, writes operations are not atomic because there are very few use cases where that matters. **openkey** is designed to process a constant stream of requests, where the only thing important to control reaching the limit of each plan.
 
 In case you need it, you can combine **openkey** with [superlock](https://github.com/Kikobeats/superlock), check the following [example](https://github.com/microlinkhq/openkey/blob/9df977877e5066478020332bffb0c1677a5cd89e/test/usage.js#L115-L138).
 
