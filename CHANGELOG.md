@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### 0.0.13 (2025-05-06)
+
+
+### Bug Fixes
+
+* **docs:** typo ([f284a12](https://github.com/microlinkhq/openkey/commit/f284a12f9c27c72018ddb95a0c36aaff6acf1caa))
+
 ### 0.0.12 (2025-05-03)
 
 ### 0.0.11 (2025-05-01)
