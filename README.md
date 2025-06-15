@@ -99,12 +99,28 @@ It represents the quota, rate limit, and throttle information specified as a pla
 It creates a new plan:
 
 ```js
+/* A customer plan of 1M requests per month */
 const plan = await openkey.plans.create({
-  name: 'free tier',
-  metadata: { tier: 'free' },
-  limit: 3000,
-  period: '1d'
+  name: 'paid customers',
+  limit: 1_000_000,
+  period: '28d'
 })
+
+/* Associate an API key with the plan */
+const key = await openkey.key.create({ plan: plan.id })
+console.log(key.value) // => 'oKLJkVqqG2zExUYD'
+
+/* use it in a HTTP flow */
+module.exports = (req, res) => {
+  const apiKey = req.headers['x-api-key']
+  if (!apiKey) return send(res, 401)
+  const { pending, ...usage } = await openkey.usage.increment(apiKey)
+  const statusCode = usage.remaining > 0 ? 200 : 429
+  res.setHeader('X-Rate-Limit-Limit', usage.limit)
+  res.setHeader('X-Rate-Limit-Remaining', usage.remaining)
+  res.setHeader('X-Rate-Limit-Reset', usage.reset)
+  return send(res, statusCode, usage)
+}
 ```
 
 The **options** accepted are:
