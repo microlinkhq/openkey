@@ -1,12 +1,13 @@
 'use strict'
 
-const { styleText } = require('util')
 const openkey = require('openkey')
 const createRepl = require('repl')
 const Redis = require('ioredis')
 const path = require('path')
 const mri = require('mri')
 const os = require('os')
+
+const { gray, white, red } = require('./style')
 
 const redis = new Redis()
 
@@ -24,9 +25,19 @@ const replEval = async input => {
   const cmd = commands[command]
 
   if (cmd) {
-    return subcommand ? cmd[subcommand](opts) : cmd(opts)
+    if (subcommand) {
+      return cmd[subcommand](opts)
+    } else if (typeof cmd === 'function') {
+      return cmd(opts)
+    } else if (typeof cmd === 'object' && cmd !== null) {
+      const tree = require('./tree')
+      const partialObj = { [command]: cmd }
+      return tree(partialObj)
+    }
   } else if (command === 'help' || command === '') {
-    return Object.keys(commands).join(' ')
+    return require('./tree')(commands)
+  } else {
+    return `${gray('Type')} ${white('help')} ${gray('to see all commands.')}`
   }
 }
 
@@ -45,7 +56,7 @@ const repl = createRepl.start({
         if (result) console.log(result)
       })
       .catch(error => {
-        console.error(styleText('red', error.message))
+        console.error(red(error.message))
       })
       .finally(callback)
   },
