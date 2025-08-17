@@ -4,40 +4,39 @@ const openkey = require('openkey')
 const createRepl = require('repl')
 const Redis = require('ioredis')
 const path = require('path')
-const mri = require('mri')
 const os = require('os')
 
-const { gray, white, red } = require('./style')
+const { red } = require('./style')
 
 const redis = new Redis()
 
 const commands = Object.assign(
   {
     version: () => require('../package.json').version,
-    exit: () => process.exit()
+    exit: () => process.exit(),
+    help: () => require('./tree')(commands)
   },
   openkey({ redis })
 )
 
 const replEval = async input => {
-  const [command, subcommand, ...args] = input.slice(0, -1).split(' ')
-  const { _, ...opts } = mri(args)
-  const cmd = commands[command]
+  const parsedInput = require('./split')(input.slice(0, -1))
+  let cmd = commands
+  let index = 0
+  const commandPath = []
 
-  if (cmd) {
-    if (subcommand) {
-      return cmd[subcommand](opts)
-    } else if (typeof cmd === 'function') {
-      return cmd(opts)
-    } else if (typeof cmd === 'object' && cmd !== null) {
-      const tree = require('./tree')
-      const partialObj = { [command]: cmd }
-      return tree(partialObj)
-    }
-  } else if (command === 'help' || command === '') {
-    return require('./tree')(commands)
+  while (index < parsedInput.length && cmd[parsedInput[index]]) {
+    commandPath.push(parsedInput[index])
+    cmd = cmd[parsedInput[index]]
+    index++
+  }
+
+  if (typeof cmd === 'function') {
+    return cmd(parsedInput.slice(index))
   } else {
-    return `${gray('Type')} ${white('help')} ${gray('to see all commands.')}`
+    const tree = require('./tree')
+    const wrappedObj = { [commandPath[commandPath.length - 1]]: cmd }
+    return tree(wrappedObj, '', commandPath.slice(0, -1).join('.'))
   }
 }
 
@@ -52,7 +51,7 @@ const repl = createRepl.start({
   prompt: '\x1b[1mopenkey\x1b[0m> ',
   eval: (input, context, filename, callback) => {
     replEval(input, context, filename)
-      .then(result => {
+      .then(async result => {
         if (result) console.log(result)
       })
       .catch(error => {
