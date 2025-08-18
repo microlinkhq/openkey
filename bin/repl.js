@@ -176,6 +176,8 @@ const createSmartRepl = ({ commands, historyManager }) => {
     completer: smartCompleter
   })
 
+  repl.removeAllListeners('SIGINT')
+
   // Inline suggestions with session context awareness
   const showSuggestion = line => {
     if (!line || line === '') {
@@ -231,6 +233,11 @@ const createSmartRepl = ({ commands, historyManager }) => {
   process.stdin.on('keypress', (str, key) => {
     if (!key) return
 
+    // Handle Ctrl+C - immediate exit
+    if (key.ctrl && key.name === 'c') {
+      process.exit(0)
+    }
+
     // Right arrow accepts suggestion
     if (key.name === 'right' && suggestionVisible && currentSuggestion && repl.cursor === repl.line.length) {
       repl.output.write('\x1b[K')
@@ -241,20 +248,18 @@ const createSmartRepl = ({ commands, historyManager }) => {
       return
     }
 
-    // Handle different key types
+    // Clear suggestions on navigation keys
     if (['up', 'down', 'left', 'enter', 'return'].includes(key.name)) {
-      // Clear suggestions on navigation keys (but not backspace/delete)
       if (suggestionVisible) {
         repl.output.write('\x1b[K')
         clearSuggestion()
       }
     } else if (['backspace', 'delete'].includes(key.name)) {
-      // Clear current suggestion and show new one after backspace/delete
       if (suggestionVisible) {
         repl.output.write('\x1b[K')
         clearSuggestion()
       }
-      // Wait for the line to be updated, then show new suggestion
+      // Show new suggestion after backspace/delete
       setTimeout(() => {
         if (repl.line) showSuggestion(repl.line)
       }, 0)
@@ -266,8 +271,7 @@ const createSmartRepl = ({ commands, historyManager }) => {
     }
   })
 
-  // Enable keypress events
-  if (process.stdin.setRawMode) process.stdin.setRawMode(true)
+  // Enable keypress events (but keep REPL's normal Ctrl+C handling)
   if (typeof require('readline').emitKeypressEvents === 'function') {
     require('readline').emitKeypressEvents(process.stdin)
   }
