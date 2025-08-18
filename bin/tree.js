@@ -24,69 +24,38 @@ const descriptions = {
 }
 
 const tree = (obj, prefix = '', parentPath = '') => {
-  if (obj === null) return 'null'
-  if (obj === undefined) return 'undefined'
+  if (obj == null) return String(obj)
+  if (typeof obj !== 'object') return String(obj)
+  if (Array.isArray(obj)) return '[]'
 
-  const type = typeof obj
+  const keys = Object.keys(obj)
+  if (keys.length === 0) return '{}'
 
-  if (type === 'string') return `"${obj}"`
-  if (type === 'number' || type === 'boolean') return String(obj)
-  if (type === 'function') return obj.name || 'anonymous'
-  if (obj instanceof Date) return `[Date: ${obj.toISOString()}]`
-  if (Buffer.isBuffer(obj)) return `[Buffer: ${obj.length} bytes]`
+  let result = ''
+  keys.forEach((key, index) => {
+    const isLast = index === keys.length - 1
+    const connector = gray(isLast ? '└── ' : '├── ')
+    const childPrefix = prefix + (isLast ? '    ' : gray('│   '))
 
-  if (Array.isArray(obj)) {
-    if (obj.length === 0) return '[]'
+    const value = obj[key]
+    const currentPath = parentPath ? `${parentPath}.${key}` : key
+    const description = descriptions[currentPath] || descriptions[key] || ''
+    const descriptionText = description ? gray(` ${description}`) : ''
 
-    let result = ''
-    obj.forEach((item, index) => {
-      const itemIsLast = index === obj.length - 1
-      const connector = gray(itemIsLast ? '└── ' : '├── ')
-      const childPrefix = prefix + (itemIsLast ? '    ' : gray('│   '))
-      result += `${prefix}${connector}${index}${gray(':')} ${tree(item, childPrefix, parentPath)}\n`
-    })
-    return result.slice(0, -1) // Remove trailing newline
-  }
-
-  if (type === 'object') {
-    const keys = Object.keys(obj)
-    if (keys.length === 0) return '{}'
-
-    let result = ''
-    keys.forEach((key, index) => {
-      const keyIsLast = index === keys.length - 1
-      const connector = gray(keyIsLast ? '└── ' : '├── ')
-      const childPrefix = prefix + (keyIsLast ? '    ' : gray('│   '))
-
-      try {
-        const value = obj[key]
-        const currentPath = parentPath ? `${parentPath}.${key}` : key
-        const description = descriptions[currentPath] || descriptions[key] || ''
-        const descriptionText = description ? gray(` ${description}`) : ''
-
-        if (typeof value === 'function') {
-          result += `${prefix}${connector}${key}${descriptionText}\n`
-        } else if (typeof value === 'object' && value !== null) {
-          result += `${prefix}${connector}${key}${descriptionText}\n`
-          const childTree = tree(value, childPrefix, currentPath)
-          if (childTree && !childTree.includes('{}')) {
-            result += childTree + '\n'
-          }
-        } else {
-          result += `${prefix}${connector}${key}${gray(':')} ${tree(
-            value,
-            childPrefix,
-            currentPath
-          )}${descriptionText}\n`
-        }
-      } catch (error) {
-        result += `${prefix}${connector}${key}${gray(':')} [Error: ${error.message}]\n`
+    if (typeof value === 'function') {
+      result += `${prefix}${connector}${key}${descriptionText}\n`
+    } else if (typeof value === 'object' && value !== null) {
+      result += `${prefix}${connector}${key}${descriptionText}\n`
+      const childTree = tree(value, childPrefix, currentPath)
+      if (childTree && !childTree.includes('{}')) {
+        result += childTree + '\n'
       }
-    })
-    return result.slice(0, -1) // Remove trailing newline
-  }
+    } else {
+      result += `${prefix}${connector}${key}${gray(':')} ${value}${descriptionText}\n`
+    }
+  })
 
-  return `[${type}]`
+  return result.slice(0, -1) // Remove trailing newline
 }
 
 module.exports = tree
