@@ -10,8 +10,8 @@ const rand = size =>
 const uid = async ({ redis, prefix = '', size }) => {
   let uid
   do uid = `${prefix}${rand(size)}`
-  while ((await redis.keys(`${prefix}*`)).includes(uid))
-  return uid
+  while ((await redis.get(uid)) !== null)
+  return uid.replace(prefix, '')
 }
 
 const pick = (obj, keys) => {

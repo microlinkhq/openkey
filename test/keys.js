@@ -36,6 +36,12 @@ test('.create # error if plan does not exist', async t => {
   t.is(error.code, 'ERR_PLAN_NOT_EXIST')
 })
 
+test(".create # don't set a previous declared key", async t => {
+  const key = await openkey.keys.create()
+  await openkey.keys.create({ value: key.value })
+  t.deepEqual(key, await openkey.keys.retrieve(key.value))
+})
+
 test('.create', async t => {
   const key = await openkey.keys.create({ metadata: { email: 'hello@microlink.io' } })
   t.truthy(key.createdAt)
