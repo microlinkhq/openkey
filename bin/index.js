@@ -12,13 +12,12 @@ const historyManager = createCommandHistoryManager()
 // REPL instance will be set after creation
 let replInstance = null
 
-const { prefix, _: uri } = mri(process.argv.slice(2))
+const { prefix, _: [uri] = [] } = mri(process.argv.slice(2))
 
 const redis = new Redis(uri)
 
 const { uid, ...openkeyCommands } = openkey({ redis, prefix })
-
-console.log(`Connected to ${uri ?? `redis://${redis.options.host}:${redis.options.port || 6379}`}`)
+console.log(`Connected to ${redis.options.host}`)
 
 const commands = Object.assign(
   {
