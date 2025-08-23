@@ -1,9 +1,10 @@
 'use strict'
 
+const { nestie } = require('nestie')
 const createRepl = require('repl')
 const path = require('path')
-const os = require('os')
 const mri = require('mri')
+const os = require('os')
 
 const { red } = require('./style')
 
@@ -64,12 +65,11 @@ const createSmartRepl = ({ commands, historyManager }) => {
 
     if (typeof cmd === 'function') {
       const { _, ...flags } = mri(parsedInput.slice(index))
-      const result = await cmd(Object.keys(flags).length > 0 ? flags : parsedInput.slice(index))
-
+      const cmdOpts = Object.keys(flags).length > 0 ? nestie(flags) : parsedInput.slice(index)
+      const result = await cmd(cmdOpts)
       // Track successful commands in session context
       sessionCommands.unshift(originalInput)
       if (sessionCommands.length > 20) sessionCommands = sessionCommands.slice(0, 20)
-
       return result
     } else {
       const tree = require('./tree')

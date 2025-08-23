@@ -18,7 +18,6 @@ module.exports = ({ serialize, deserialize, plans, redis, prefix } = {}) => {
    */
   const create = async (opts = {}) => {
     const key = { enabled: opts.enabled ?? true }
-    if (metadata) key.metadata = metadata
     metadata(key, opts)
     key.createdAt = key.updatedAt = Date.now()
     const value = opts.value ?? (await uid({ prefix: prefixKey(''), redis }))
