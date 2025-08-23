@@ -21,7 +21,7 @@ module.exports = ({ serialize, deserialize, plans, redis, prefix } = {}) => {
     if (metadata) key.metadata = metadata
     metadata(key, opts)
     key.createdAt = key.updatedAt = Date.now()
-    const value = opts.value ?? (await uid({ redis, size: 16 }))
+    const value = opts.value ?? (await uid({ prefix: prefixKey(''), redis, size: 16 }))
     if (opts.plan) {
       await plans.retrieve(opts.plan, { throwError: true })
       key.plan = opts.plan
