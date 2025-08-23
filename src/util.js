@@ -7,7 +7,7 @@ const BASE_58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 const rand = size =>
   getRandomValues(new Uint8Array(size)).reduce((id, value) => id + BASE_58.charAt(value % BASE_58.length), '')
 
-const uid = async ({ redis, prefix = '', size }) => {
+const uid = async ({ redis, prefix = '', size = 16 }) => {
   let uid
   do uid = `${prefix}${rand(size)}`
   while ((await redis.get(uid)) !== null)

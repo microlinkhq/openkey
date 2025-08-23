@@ -2,14 +2,23 @@
 
 const openkey = require('openkey')
 const Redis = require('ioredis')
+const mri = require('mri')
+
 const { createCommandHistoryManager } = require('./history')
 const { createSmartRepl } = require('./repl')
 
-const redis = new Redis()
 const historyManager = createCommandHistoryManager()
 
 // REPL instance will be set after creation
 let replInstance = null
+
+const { prefix, _: uri } = mri(process.argv.slice(2))
+
+const redis = new Redis(uri)
+
+const { uid, ...openkeyCommands } = openkey({ redis, prefix })
+
+console.log(`Connected to ${uri ?? `redis://${redis.options.host}:${redis.options.port || 6379}`}`)
 
 const commands = Object.assign(
   {
@@ -42,7 +51,10 @@ const commands = Object.assign(
       }
     }
   },
-  openkey({ redis })
+  openkeyCommands,
+  {
+    uid: args => uid({ redis, ...args })
+  }
 )
 
 replInstance = createSmartRepl({ commands, historyManager })

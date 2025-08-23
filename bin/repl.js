@@ -4,6 +4,7 @@ const createRepl = require('repl')
 const path = require('path')
 const os = require('os')
 const mri = require('mri')
+
 const { red } = require('./style')
 
 const split = str => {
@@ -72,7 +73,10 @@ const createSmartRepl = ({ commands, historyManager }) => {
       return result
     } else {
       const tree = require('./tree')
-      const wrappedObj = { [commandPath[commandPath.length - 1]]: cmd }
+      // If no command path (just pressing enter), show full help like 'help' command
+      if (commandPath.length === 0) return tree(commands)
+      const rootName = commandPath[commandPath.length - 1]
+      const wrappedObj = { [rootName]: cmd }
       return tree(wrappedObj, '', commandPath.slice(0, -1).join('.'))
     }
   }

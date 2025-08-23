@@ -3,24 +3,25 @@
 const { gray } = require('./style')
 
 const descriptions = {
-  version: 'print the version of the openkey',
-  exit: 'exit the program',
-  keys: 'manage keys',
   'keys.create': 'create a new key',
-  'keys.retrieve': 'retrieve a key',
   'keys.del': 'delete a key',
-  'keys.update': 'update a key',
   'keys.list': 'list all keys',
   'keys.prefixKey': 'prefix a key',
-  plans: 'manage plans',
+  'keys.retrieve': 'retrieve a key',
+  'keys.update': 'update a key',
   'plans.create': 'create a new plan',
   'plans.del': 'delete a plan',
-  'plans.retrieve': 'retrieve a plan',
-  'plans.update': 'update a plan',
   'plans.list': 'list all plans',
   'plans.prefixKey': 'prefix a plan',
+  'plans.retrieve': 'retrieve a plan',
+  'plans.update': 'update a plan',
+  exit: 'exit the program',
+  keys: 'manage keys',
+  plans: 'manage plans',
+  stats: 'get the stats of the openkey',
+  uid: 'generate an unique id',
   usage: 'get the usage of a key',
-  stats: 'get the stats of the openkey'
+  version: 'print the version of the openkey'
 }
 
 const tree = (obj, prefix = '', parentPath = '') => {
@@ -28,7 +29,7 @@ const tree = (obj, prefix = '', parentPath = '') => {
   if (typeof obj !== 'object') return String(obj)
   if (Array.isArray(obj)) return '[]'
 
-  const keys = Object.keys(obj)
+  const keys = Object.keys(obj).sort()
   if (keys.length === 0) return '{}'
 
   let result = ''
