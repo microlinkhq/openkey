@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### 0.0.17 (2025-08-23)
+
+
+### Bug Fixes
+
+* **keys:** key value collision ([#34](https://github.com/microlinkhq/openkey/issues/34)) ([cbabe8b](https://github.com/microlinkhq/openkey/commit/cbabe8bbccb0d7b2cf623e4275f7fd6f62daef53))
+
 ### 0.0.16 (2025-08-18)
 
 ### 0.0.15 (2025-08-17)

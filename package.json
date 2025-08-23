@@ -2,7 +2,7 @@
   "name": "openkey",
   "description": "Fast authentication layer for your SaaS, backed by Redis.",
   "homepage": "https://openkey.js.org",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "main": "src/index.js",
   "exports": {
     ".": "./src/index.js"
