@@ -3,6 +3,7 @@
   "description": "Fast authentication layer for your SaaS, backed by Redis.",
   "homepage": "https://openkey.js.org",
   "version": "0.0.18",
+  "types": "src/index.d.ts",
   "main": "src/index.js",
   "exports": {
     ".": "./src/index.js"
@@ -68,7 +69,8 @@
     "simple-git-hooks": "latest",
     "standard": "latest",
     "standard-version": "latest",
-    "superlock": "latest"
+    "superlock": "latest",
+    "tsd": "latest"
   },
   "engines": {
     "node": ">= 18"
@@ -82,7 +84,7 @@
     "coverage": "c8 report --reporter=text-lcov > coverage/lcov.info",
     "dev": "concurrently \"gulp\" \"npm run dev:server\"",
     "dev:server": "browser-sync start --server --files \"index.html, README.md, static/**/*.(css|js)\"",
-    "lint": "standard",
+    "lint": "standard && tsd",
     "postrelease": "npm run release:tags && npm run release:github && (ci-publish || npm publish --access=public)",
     "pretest": "npm run lint",
     "release": "standard-version -a",
@@ -120,5 +122,8 @@
   "simple-git-hooks": {
     "commit-msg": "npx commitlint --edit",
     "pre-commit": "npx nano-staged"
+  },
+  "tsd": {
+    "directory": "test"
   }
 }
