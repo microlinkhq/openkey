@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### 0.0.19 (2025-08-31)
+
+
+### Features
+
+* add types ([#36](https://github.com/microlinkhq/openkey/issues/36)) ([c6f7937](https://github.com/microlinkhq/openkey/commit/c6f7937afad7dc4fd9e53ed9f540ecce9dcd8c1a))
+
 ### 0.0.18 (2025-08-23)
 
 ### 0.0.17 (2025-08-23)
