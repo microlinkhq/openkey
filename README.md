@@ -252,7 +252,7 @@ In the same way than [.create](#create-1), any other field that is not a support
 It deletes a key by value:
 
 ```js
-await openkey.plans.del(value)
+await openkey.keys.del('weBr5XsJL5ZBm7zZ')
 ```
 
 It will throw an error if the key value doesn't exist.
