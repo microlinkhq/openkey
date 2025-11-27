@@ -2,10 +2,34 @@
 
 const { getRandomValues } = require('crypto')
 
-const BASE_58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+/// Bitcoin Base58 (no 0, O, I, l)
+const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 
-const rand = size =>
-  getRandomValues(new Uint8Array(size)).reduce((id, value) => id + BASE_58.charAt(value % BASE_58.length), '')
+const ALPHA_LEN = ALPHABET.length // 58
+
+// 2^6 - 1 = 63 → smallest mask >= 58
+const MASK = 63
+
+// nanoid rule: optimal randomness batch size
+const STEP_FACTOR = 1.6
+
+const rand = (size = 22) => {
+  let id = ''
+  const step = Math.ceil((STEP_FACTOR * MASK * size) / ALPHA_LEN)
+
+  while (id.length < size) {
+    const bytes = getRandomValues(new Uint8Array(step))
+    for (const byte of bytes) {
+      const index = byte & MASK
+      if (index < ALPHA_LEN) {
+        id += ALPHABET[index]
+        if (id.length === size) break
+      }
+    }
+  }
+
+  return id
+}
 
 const uid = async ({ redis, prefix = '', size = 16 }) => {
   let uid
@@ -40,5 +64,6 @@ module.exports = {
   formatYYYMMDDDate,
   isPlainObject,
   pick,
+  rand,
   uid
 }
