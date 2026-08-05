@@ -2,7 +2,7 @@
   "name": "openkey",
   "description": "Fast Redis-backed authentication and rate-limiting layer for SaaS APIs and dashboards.",
   "homepage": "https://openkey.js.org",
-  "version": "0.0.25",
+  "version": "0.0.26",
   "types": "src/index.d.ts",
   "main": "src/index.js",
   "exports": {
