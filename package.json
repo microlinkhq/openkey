@@ -1,6 +1,6 @@
 {
   "name": "openkey",
-  "description": "Fast authentication layer for your SaaS, backed by Redis.",
+  "description": "Fast Redis-backed authentication and rate-limiting layer for SaaS APIs and dashboards.",
   "homepage": "https://openkey.js.org",
   "version": "0.0.25",
   "types": "src/index.d.ts",
@@ -31,11 +31,16 @@
     "url": "https://github.com/microlinkhq/openkey/issues"
   },
   "keywords": [
+    "api-key",
+    "auth",
     "authorization",
-    "limit",
-    "rate",
-    "ratelimter",
-    "security"
+    "middleware",
+    "quota",
+    "rate-limit",
+    "redis",
+    "saas",
+    "security",
+    "token"
   ],
   "dependencies": {
     "json-buffer": "~3.0.1",
@@ -112,6 +117,7 @@
   },
   "nano-staged": {
     "*.js": [
+      "npx @kikobeats/prettier-standard",
       "standard --fix"
     ],
     "package.json": [
